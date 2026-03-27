@@ -8,7 +8,7 @@
  *   PEERLYTICS_API_KEY=pk_live_... npx tsx orderbook-snapshot.ts
  *
  * Environment:
- *   PEERLYTICS_API_KEY  - API key (optional, falls back to free tier)
+ *   PEERLYTICS_API_KEY  - API key (get one at peerlytics.xyz/developers)
  *   CURRENCIES          - Comma-separated list (default: GBP,EUR,BRL,TRY,NGN)
  */
 

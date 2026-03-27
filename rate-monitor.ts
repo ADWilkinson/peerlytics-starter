@@ -8,7 +8,7 @@
  *   PEERLYTICS_API_KEY=pk_live_... npx tsx rate-monitor.ts
  *
  * Environment:
- *   PEERLYTICS_API_KEY  - API key (optional, falls back to free tier)
+ *   PEERLYTICS_API_KEY  - API key (get one at peerlytics.xyz/developers)
  *   CURRENCY            - Fiat currency to watch (default: GBP)
  *   THRESHOLD           - Alert when best rate drops below this (default: 1.02)
  *   POLL_SECONDS        - Polling interval (default: 60)
@@ -83,7 +83,7 @@ async function main(): Promise<void> {
   console.log(`  │  Currency   ${CURRENCY.padEnd(28)}│`);
   console.log(`  │  Threshold  ${fmt.rate(THRESHOLD).padEnd(28)}│`);
   console.log(`  │  Interval   ${(POLL_SECONDS + "s").padEnd(28)}│`);
-  console.log(`  │  Auth       ${(process.env.PEERLYTICS_API_KEY ? "API key" : "free tier").padEnd(28)}│`);
+  console.log(`  │  Auth       ${(process.env.PEERLYTICS_API_KEY ? "API key" : "not set!").padEnd(28)}│`);
   console.log(`  └─────────────────────────────────────────┘`);
   console.log();
 

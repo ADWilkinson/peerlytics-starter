@@ -9,7 +9,7 @@ Install: npm install @peerlytics/sdk
 
 ```ts
 import { Peerlytics } from "@peerlytics/sdk";
-const client = new Peerlytics({ apiKey: "pk_live_..." }); // apiKey is optional, free tier works without it
+const client = new Peerlytics({ apiKey: "pk_live_..." }); // required (each key includes 1000 free requests/month)
 ```
 
 ## Methods
@@ -56,9 +56,8 @@ Account:
 
 ## Auth
 
-1. API key: set PEERLYTICS_API_KEY env var or pass { apiKey: "pk_live_..." }
+1. API key: set PEERLYTICS_API_KEY env var or pass { apiKey: "pk_live_..." }. Each key includes 1000 free requests/month. Generate via peerlytics.xyz/developers or programmatically with client.createKey().
 2. x402: pay per request with USDC on Base, no key needed
-3. Free tier: 1000 requests/month, no key required
 
 ## Errors
 

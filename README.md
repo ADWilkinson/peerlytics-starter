@@ -8,6 +8,7 @@ TypeScript examples for the [Peerlytics API](https://peerlytics.xyz/developers).
 git clone https://github.com/ADWilkinson/peerlytics-starter.git
 cd peerlytics-starter
 npm install
+export PEERLYTICS_API_KEY=pk_live_your_key_here  # get one at peerlytics.xyz/developers
 npx tsx volume-dashboard.ts
 ```
 
@@ -26,27 +27,25 @@ Each script is self-contained. Run any with `npx tsx <file>.ts`.
 
 ## Auth
 
-You don't need an API key to get started. The free tier gives you 1,000 requests/month.
+Two ways to authenticate:
 
-For higher limits, grab a key at [peerlytics.xyz/developers](https://peerlytics.xyz/developers?tab=account) and export it:
+**API key** (recommended). Every key includes 1,000 free requests/month. Generate one at [peerlytics.xyz/developers](https://peerlytics.xyz/developers?tab=account) or programmatically via `client.createKey()`, then:
 
 ```bash
 export PEERLYTICS_API_KEY=pk_live_your_key_here
 ```
 
-Or copy the template:
+**x402** (keyless). Pay per request with USDC on Base. No account, no key. See `x402-agent.ts` for the full flow.
+
+## Config
 
 ```bash
 cp .env.example .env
 ```
 
-There's also x402 (pay-per-request with USDC on Base) if you want to skip keys entirely. See `x402-agent.ts`.
-
-## Config
-
 | Variable | Default | Script |
 |----------|---------|--------|
-| `PEERLYTICS_API_KEY` | _(free tier)_ | all |
+| `PEERLYTICS_API_KEY` | _(required)_ | all except x402-agent |
 | `CURRENCY` | `GBP` | rate-monitor |
 | `CURRENCIES` | `GBP,EUR,BRL,TRY,NGN` | orderbook-snapshot |
 | `THRESHOLD` | `1.02` | rate-monitor |
@@ -82,7 +81,7 @@ Full reference on [npm](https://www.npmjs.com/package/@peerlytics/sdk).
 
 ## For agents
 
-If you're integrating with an LLM or building an autonomous agent:
+If you're building an autonomous agent or integrating with an LLM:
 
 - **llms.txt** at `https://peerlytics.xyz/llms.txt` has the full API surface in a format agents can parse
 - **OpenAPI spec** at `https://peerlytics.xyz/api/openapi` for structured endpoint discovery

@@ -8,7 +8,7 @@
  *   PEERLYTICS_API_KEY=pk_live_... npx tsx maker-report.ts 0x1234...
  *
  * Environment:
- *   PEERLYTICS_API_KEY  - API key (optional, falls back to free tier)
+ *   PEERLYTICS_API_KEY  - API key (get one at peerlytics.xyz/developers)
  */
 
 import { Peerlytics, PeerlyticsError, NotFoundError } from "@peerlytics/sdk";
