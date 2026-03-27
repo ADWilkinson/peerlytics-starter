@@ -78,10 +78,14 @@ async function main(): Promise<void> {
     requirements = JSON.parse(rawHeader);
   }
 
-  console.log(`     Network     Base (chain 8453)`);
-  console.log(`     Token       USDC`);
-  console.log(`     Amount      ${JSON.stringify(requirements.maxAmountRequired ?? requirements.amount)}`);
-  console.log(`     Recipient   ${requirements.payeeAddress ?? requirements.receiver}`);
+  // x402 v2 structure: { accepts: [{ scheme, network, amount, asset, payTo, ... }] }
+  const accepts = (requirements.accepts as Array<Record<string, unknown>>) ?? [];
+  const first = accepts[0];
+
+  console.log(`     Network     ${first?.network ?? "eip155:8453"}`);
+  console.log(`     Token       USDC (${first?.asset ?? "0x833589..."})`);
+  console.log(`     Amount      ${first?.amount ?? "unknown"} (raw units)`);
+  console.log(`     Pay to      ${first?.payTo ?? "unknown"}`);
   console.log();
 
   // Step 3: Build payment
