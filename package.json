@@ -1,0 +1,18 @@
+{
+  "name": "peerlytics-starter",
+  "version": "1.0.0",
+  "description": "Example scripts for the Peerlytics API and @peerlytics/sdk",
+  "private": true,
+  "scripts": {
+    "rate-monitor": "npx tsx rate-monitor.ts",
+    "volume-dashboard": "npx tsx volume-dashboard.ts",
+    "x402-agent": "npx tsx x402-agent.ts"
+  },
+  "dependencies": {
+    "@peerlytics/sdk": "latest"
+  },
+  "devDependencies": {
+    "tsx": "latest",
+    "typescript": "latest"
+  }
+}
