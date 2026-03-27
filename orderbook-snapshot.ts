@@ -107,35 +107,29 @@ async function main(): Promise<void> {
   for (const currency of CURRENCIES) {
     try {
       const orderbook = await client.getOrderbook({ currency });
-      const entries = orderbook.orders ?? orderbook.deposits ?? [];
 
-      // Group by rate level (rounded to 4 decimals)
-      const grouped = new Map<string, { liquidity: number; deposits: number }>();
-      let totalLiquidity = 0;
+      // Find the matching currency in orderbooks
+      const currencyBook = orderbook.orderbooks.find(
+        (ob) => ob.currency.toUpperCase() === currency.toUpperCase(),
+      );
 
-      for (const entry of entries) {
-        const rate = entry.conversionRate ?? entry.rate ?? 0;
-        const liq = Number(entry.availableLiquidity ?? entry.amount ?? 0);
-        const key = rate.toFixed(4);
-
-        totalLiquidity += liq;
-
-        const existing = grouped.get(key);
-        if (existing) {
-          existing.liquidity += liq;
-          existing.deposits += 1;
-        } else {
-          grouped.set(key, { liquidity: liq, deposits: 1 });
-        }
+      if (!currencyBook || currencyBook.levels.length === 0) {
+        renderMarket(currency, [], 0);
+        console.log();
+        continue;
       }
 
-      // Sort by rate ascending
-      const levels: RateLevel[] = Array.from(grouped.entries())
-        .map(([key, val]) => ({ rate: Number(key), ...val }))
+      // Map OrderbookLevel to RateLevel for display
+      const levels: RateLevel[] = currencyBook.levels
+        .map((level) => ({
+          rate: level.rate,
+          liquidity: level.totalLiquidityUsd,
+          deposits: level.depositCount,
+        }))
         .sort((a, b) => a.rate - b.rate)
         .slice(0, 12); // Cap at 12 levels for readability
 
-      renderMarket(currency, levels, totalLiquidity);
+      renderMarket(currency, levels, currencyBook.totalLiquidityUsd);
       console.log();
     } catch (err) {
       if (err instanceof PeerlyticsError) {

@@ -70,17 +70,18 @@ async function main(): Promise<void> {
 
   // Protocol summary
   box("Protocol Summary");
-  row("Total Volume", fmt.green(fmt.usd(summary.totalVolume ?? 0)));
-  row("Active Liquidity", fmt.usd(summary.activeLiquidity ?? 0));
-  row("Active Deposits", String(summary.activeDeposits ?? 0));
-  row("Unique Makers", String(summary.uniqueMakers ?? 0));
-  row("Unique Takers", String(summary.uniqueTakers ?? 0));
+  row("Total Volume", fmt.green(fmt.usd(summary.periods.mtd.metrics.volume)));
+  row("Active Liquidity", fmt.usd(summary.liquidity.available));
+  row("Active Deposits", String(summary.liquidity.activeDeposits));
+  row("Unique Users", String(summary.periods.mtd.metrics.uniqueUsers));
+  row("Success Rate", `${(summary.periods.mtd.metrics.successRate * 100).toFixed(1)}%`);
   bottom();
 
   console.log();
 
   // Top makers
-  if (leaderboard.makers?.length) {
+  const topMakers = leaderboard.makers.byVolume;
+  if (topMakers.length) {
     box("Top Makers");
     console.log(
       `  │  ${fmt.dim(fmt.pad("#", 4))}${fmt.dim(fmt.pad("Address", 16))}` +
@@ -88,13 +89,13 @@ async function main(): Promise<void> {
     );
     console.log(`  │  ${"─".repeat(W - 4)}  │`);
 
-    for (let i = 0; i < leaderboard.makers.length; i++) {
-      const m = leaderboard.makers[i];
+    for (let i = 0; i < topMakers.length; i++) {
+      const m = topMakers[i];
       const line =
         `  ${fmt.pad(String(i + 1), 4)}` +
         `${fmt.pad(fmt.addr(m.address), 16)}` +
-        `${fmt.pad(fmt.usd(m.totalVolume ?? 0), 14)}` +
-        `${m.depositCount ?? 0}`;
+        `${fmt.pad(fmt.usd(m.volumeUsd), 14)}` +
+        `${m.activeDeposits}`;
       const visible = line.replace(/\x1b\[\d+m/g, "");
       const pad = Math.max(0, W - visible.length + 2);
       console.log(`  │${line}${" ".repeat(pad)}│`);
@@ -104,21 +105,22 @@ async function main(): Promise<void> {
   }
 
   // Top takers
-  if (leaderboard.takers?.length) {
+  const topTakers = leaderboard.takers.byVolume;
+  if (topTakers.length) {
     box("Top Takers");
     console.log(
       `  │  ${fmt.dim(fmt.pad("#", 4))}${fmt.dim(fmt.pad("Address", 16))}` +
-        `${fmt.dim(fmt.pad("Volume", 14))}${fmt.dim("Intents")}${" ".repeat(W - 47)}│`,
+        `${fmt.dim(fmt.pad("Volume", 14))}${fmt.dim("Signals")}${" ".repeat(W - 47)}│`,
     );
     console.log(`  │  ${"─".repeat(W - 4)}  │`);
 
-    for (let i = 0; i < leaderboard.takers.length; i++) {
-      const t = leaderboard.takers[i];
+    for (let i = 0; i < topTakers.length; i++) {
+      const t = topTakers[i];
       const line =
         `  ${fmt.pad(String(i + 1), 4)}` +
         `${fmt.pad(fmt.addr(t.address), 16)}` +
-        `${fmt.pad(fmt.usd(t.totalVolume ?? 0), 14)}` +
-        `${t.intentCount ?? 0}`;
+        `${fmt.pad(fmt.usd(t.volumeUsd), 14)}` +
+        `${t.signalCount}`;
       const visible = line.replace(/\x1b\[\d+m/g, "");
       const pad = Math.max(0, W - visible.length + 2);
       console.log(`  │${line}${" ".repeat(pad)}│`);

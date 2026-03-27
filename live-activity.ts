@@ -10,15 +10,16 @@
  * Environment:
  *   PEERLYTICS_API_KEY  - API key (get one at peerlytics.xyz/developers)
  *   POLL_SECONDS        - Polling interval (default: 10)
- *   EVENT_TYPE          - Filter by type: signal, fill, rate_update, etc. (default: all)
+ *   EVENT_TYPE          - Filter by type: intent_signaled, intent_fulfilled, etc. (default: all)
  */
 
+import type { LiveEvent, EventType, ActivityFilters } from "@peerlytics/sdk";
 import { Peerlytics, PeerlyticsError } from "@peerlytics/sdk";
 
 // ── Config ──────────────────────────────────────────────────────
 
 const POLL_SECONDS = Number(process.env.POLL_SECONDS ?? "10");
-const EVENT_TYPE = process.env.EVENT_TYPE;
+const EVENT_TYPE = process.env.EVENT_TYPE as EventType | undefined;
 
 // ── Formatting ──────────────────────────────────────────────────
 
@@ -44,22 +45,18 @@ const fmt = {
 
 // Event type colors and labels
 const EVENT_STYLES: Record<string, { color: (s: string) => string; icon: string }> = {
-  signal: { color: fmt.cyan, icon: "◈" },
   intent_signaled: { color: fmt.cyan, icon: "◈" },
-  fill: { color: fmt.green, icon: "●" },
   intent_fulfilled: { color: fmt.green, icon: "●" },
-  fulfillment: { color: fmt.green, icon: "●" },
+  intent_pruned: { color: fmt.red, icon: "✕" },
   deposit_created: { color: fmt.magenta, icon: "+" },
-  deposit: { color: fmt.magenta, icon: "+" },
-  rate_update: { color: fmt.yellow, icon: "↕" },
-  rate_change: { color: fmt.yellow, icon: "↕" },
-  withdrawal: { color: fmt.red, icon: "−" },
-  withdraw: { color: fmt.red, icon: "−" },
+  deposit_topup: { color: fmt.magenta, icon: "↑" },
+  deposit_withdrawn: { color: fmt.red, icon: "−" },
+  deposit_closed: { color: fmt.red, icon: "×" },
+  deposit_rate_updated: { color: fmt.yellow, icon: "↕" },
 };
 
 function getStyle(type: string): { color: (s: string) => string; icon: string } {
-  const normalized = type.toLowerCase().replace(/\s+/g, "_");
-  return EVENT_STYLES[normalized] ?? { color: fmt.dim, icon: "·" };
+  return EVENT_STYLES[type] ?? { color: fmt.dim, icon: "·" };
 }
 
 // ── Client ──────────────────────────────────────────────────────
@@ -72,53 +69,42 @@ const client = new Peerlytics({
 
 const seen = new Set<string>();
 
-function eventKey(event: Record<string, unknown>): string {
-  // Derive a unique key from available fields
-  const hash = event.intentHash ?? event.hash ?? event.id ?? event.txHash ?? "";
-  const type = event.type ?? event.eventType ?? "";
-  const ts = event.timestamp ?? event.blockTimestamp ?? "";
-  return `${type}-${hash}-${ts}`;
+function eventKey(event: LiveEvent): string {
+  const hash = event.intentHash ?? event.id ?? "";
+  return `${event.type}-${hash}-${event.timestamp}`;
 }
 
-function renderEvent(event: Record<string, unknown>): void {
-  const type = String(event.type ?? event.eventType ?? "event");
-  const style = getStyle(type);
-
-  const amount = event.amount ?? event.usdcAmount ?? event.value;
-  const currency = event.currency ?? event.fiatCurrency ?? "";
-  const platform = event.platform ?? event.paymentPlatform ?? "";
-  const from = event.from ?? event.depositor ?? event.maker ?? event.taker ?? "";
-  const depositId = event.depositId ?? "";
-  const rate = event.rate ?? event.conversionRate;
+function renderEvent(event: LiveEvent): void {
+  const style = getStyle(event.type);
 
   let detail = "";
 
-  if (amount) detail += `${fmt.usd(Number(amount))} `;
-  if (currency) detail += `${currency} `;
-  if (platform) detail += `${fmt.dim("on")} ${platform} `;
-  if (rate) detail += `${fmt.dim("@")} ${Number(rate).toFixed(4)} `;
-  if (from) detail += `${fmt.dim("by")} ${fmt.addr(String(from))} `;
-  if (depositId) detail += `${fmt.dim("deposit")} ${String(depositId).slice(0, 8)} `;
+  if (event.amountUsd != null) detail += `${fmt.usd(event.amountUsd)} `;
+  if (event.currency) detail += `${event.currency} `;
+  if (event.platform) detail += `${fmt.dim("on")} ${event.platform} `;
+  if (event.conversionRate) detail += `${fmt.dim("@")} ${Number(event.conversionRate).toFixed(4)} `;
+  if (event.depositor) detail += `${fmt.dim("by")} ${fmt.addr(event.depositor)} `;
+  else if (event.owner) detail += `${fmt.dim("by")} ${fmt.addr(event.owner)} `;
+  if (event.depositId) detail += `${fmt.dim("deposit")} ${event.depositId.slice(0, 8)} `;
 
-  const typeLabel = style.color(fmt.pad(type.toUpperCase(), 18));
+  const typeLabel = style.color(fmt.pad(event.type.toUpperCase(), 22));
   console.log(`  ${fmt.dim(fmt.time())}  ${style.color(style.icon)} ${typeLabel} ${detail.trim()}`);
 }
 
 async function poll(): Promise<void> {
-  const params: Record<string, unknown> = { limit: 20 };
-  if (EVENT_TYPE) params.type = EVENT_TYPE;
+  const filters: ActivityFilters = { limit: 20 };
+  if (EVENT_TYPE) filters.type = EVENT_TYPE;
 
-  const activity = await client.getActivity(params as Parameters<typeof client.getActivity>[0]);
-  const events = activity.events ?? activity.activities ?? [];
+  const activity = await client.getActivity(filters);
 
   // Process newest first, but display in chronological order
-  const newEvents: Record<string, unknown>[] = [];
+  const newEvents: LiveEvent[] = [];
 
-  for (const event of events) {
-    const key = eventKey(event as Record<string, unknown>);
+  for (const event of activity.events) {
+    const key = eventKey(event);
     if (!seen.has(key)) {
       seen.add(key);
-      newEvents.push(event as Record<string, unknown>);
+      newEvents.push(event);
     }
   }
 

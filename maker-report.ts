@@ -80,29 +80,27 @@ async function main(): Promise<void> {
     client.getMakerHistory(address).catch(() => null),
   ]);
 
+  const { summary } = maker;
+
   // Overview
   box("Portfolio Overview");
   row("Address", fmt.cyan(fmt.addr(address)));
-  row("Total Volume", fmt.green(fmt.usd(maker.totalVolume ?? 0)));
-  row("Total Deposits", String(maker.depositCount ?? maker.totalDeposits ?? 0));
-  row("Active Deposits", String(maker.activeDeposits ?? 0));
-  row("Intents Filled", String(maker.totalIntents ?? maker.intentsFilled ?? 0));
+  row("Total Volume", fmt.green(fmt.usd(summary.totalFillVolumeUsd)));
+  row("Total Deposits", String(summary.totalDeposits));
+  row("Active Deposits", String(summary.activeDeposits));
+  row("Intents Filled", String(summary.fulfilledIntents));
 
-  if (maker.totalProfit != null || maker.earnings != null) {
-    const profit = Number(maker.totalProfit ?? maker.earnings ?? 0);
-    row("Total Profit", profit >= 0 ? fmt.green(fmt.usd(profit)) : fmt.red(fmt.usd(profit)));
-  }
+  const profit = summary.totalProfitUsd;
+  row("Total Profit", profit >= 0 ? fmt.green(fmt.usd(profit)) : fmt.red(fmt.usd(profit)));
 
-  if (maker.apr != null || maker.estimatedApr != null) {
-    const apr = Number(maker.apr ?? maker.estimatedApr ?? 0);
-    row("Estimated APR", apr > 0 ? fmt.green(fmt.pct(apr)) : fmt.dim("--"));
-  }
+  const apr = summary.weightedAvgApr;
+  row("Estimated APR", apr != null && apr > 0 ? fmt.green(fmt.pct(apr)) : fmt.dim("--"));
 
   bottom();
   console.log();
 
   // Deposits breakdown
-  const deposits = maker.deposits ?? [];
+  const deposits = maker.deposits;
 
   if (deposits.length > 0) {
     box("Active Deposits");
@@ -110,24 +108,24 @@ async function main(): Promise<void> {
       `  │  ${fmt.dim(fmt.pad("ID", 8))}` +
         `${fmt.dim(fmt.pad("Platform", 12))}` +
         `${fmt.dim(fmt.pad("Currency", 10))}` +
-        `${fmt.dim(fmt.pad("Rate", 10))}` +
+        `${fmt.dim(fmt.pad("Status", 10))}` +
         `${fmt.dim("Liquidity")}${" ".repeat(W - 53)}│`,
     );
     console.log(`  │  ${"─".repeat(W - 4)}  │`);
 
     const shown = deposits.slice(0, 10);
     for (const d of shown) {
-      const id = String(d.depositId ?? d.id ?? "?").slice(0, 6);
-      const platform = String(d.platform ?? d.paymentPlatform ?? "").slice(0, 10);
-      const currency = String(d.currency ?? "").slice(0, 8);
-      const rate = d.conversionRate ?? d.rate ?? 0;
-      const liq = Number(d.availableLiquidity ?? d.amount ?? 0);
+      const id = d.depositId.slice(0, 6);
+      const platform = (d.platforms[0] ?? "").slice(0, 10);
+      const currency = (d.currencies[0] ?? "").slice(0, 8);
+      const status = d.status.slice(0, 8);
+      const liq = d.availableUsd;
 
       const line =
         `  ${fmt.pad(id, 8)}` +
         `${fmt.pad(platform, 12)}` +
         `${fmt.pad(currency, 10)}` +
-        `${fmt.pad(Number(rate).toFixed(4), 10)}` +
+        `${fmt.pad(status, 10)}` +
         `${fmt.usd(liq)}`;
       const visible = line.replace(/\x1b\[\d+m/g, "");
       const pad = Math.max(0, W - visible.length + 2);
@@ -145,41 +143,26 @@ async function main(): Promise<void> {
     console.log();
   }
 
-  // Platform breakdown from deposits
-  if (deposits.length > 0) {
-    const platforms = new Map<string, { count: number; liquidity: number; volume: number }>();
+  // Platform breakdown from platformAllocations
+  const platformAllocations = maker.platformAllocations;
 
-    for (const d of deposits) {
-      const p = String(d.platform ?? d.paymentPlatform ?? "unknown");
-      const liq = Number(d.availableLiquidity ?? d.amount ?? 0);
-      const vol = Number(d.volume ?? 0);
-
-      const existing = platforms.get(p);
-      if (existing) {
-        existing.count++;
-        existing.liquidity += liq;
-        existing.volume += vol;
-      } else {
-        platforms.set(p, { count: 1, liquidity: liq, volume: vol });
-      }
-    }
-
+  if (platformAllocations.length > 0) {
     box("Platform Breakdown");
     console.log(
       `  │  ${fmt.dim(fmt.pad("Platform", 14))}` +
-        `${fmt.dim(fmt.pad("Deposits", 10))}` +
-        `${fmt.dim(fmt.pad("Liquidity", 14))}` +
-        `${fmt.dim("Volume")}${" ".repeat(W - 52)}│`,
+        `${fmt.dim(fmt.pad("Fills", 10))}` +
+        `${fmt.dim(fmt.pad("Volume", 14))}` +
+        `${fmt.dim("Profit")}${" ".repeat(W - 50)}│`,
     );
     console.log(`  │  ${"─".repeat(W - 4)}  │`);
 
-    const sorted = Array.from(platforms.entries()).sort((a, b) => b[1].liquidity - a[1].liquidity);
-    for (const [name, data] of sorted) {
+    const sorted = [...platformAllocations].sort((a, b) => b.volumeUsd - a.volumeUsd);
+    for (const p of sorted) {
       const line =
-        `  ${fmt.pad(name, 14)}` +
-        `${fmt.pad(String(data.count), 10)}` +
-        `${fmt.pad(fmt.usd(data.liquidity), 14)}` +
-        `${fmt.usd(data.volume)}`;
+        `  ${fmt.pad(p.platform, 14)}` +
+        `${fmt.pad(String(p.fulfilledIntents), 10)}` +
+        `${fmt.pad(fmt.usd(p.volumeUsd), 14)}` +
+        `${fmt.usd(p.profitUsd)}`;
       const visible = line.replace(/\x1b\[\d+m/g, "");
       const pad = Math.max(0, W - visible.length + 2);
       console.log(`  │${line}${" ".repeat(pad)}│`);
@@ -191,23 +174,24 @@ async function main(): Promise<void> {
 
   // Historical stats
   if (history) {
-    const periods = history.periods ?? history.snapshots ?? [];
-    if (periods.length > 0) {
-      box("Historical Performance");
+    const recentIntents = history.intents.recent;
+    if (recentIntents.length > 0) {
+      box("Recent Activity");
       console.log(
-        `  │  ${fmt.dim(fmt.pad("Period", 14))}` +
-          `${fmt.dim(fmt.pad("Volume", 14))}` +
-          `${fmt.dim("Intents")}${" ".repeat(W - 41)}│`,
+        `  │  ${fmt.dim(fmt.pad("Currency", 10))}` +
+          `${fmt.dim(fmt.pad("Amount", 14))}` +
+          `${fmt.dim(fmt.pad("Status", 12))}` +
+          `${fmt.dim("Platform")}${" ".repeat(W - 52)}│`,
       );
       console.log(`  │  ${"─".repeat(W - 4)}  │`);
 
-      const shown = periods.slice(0, 6);
-      for (const p of shown) {
-        const label = String(p.period ?? p.date ?? p.label ?? "");
-        const vol = Number(p.volume ?? p.totalVolume ?? 0);
-        const intents = Number(p.intents ?? p.intentCount ?? 0);
-
-        const line = `  ${fmt.pad(label, 14)}${fmt.pad(fmt.usd(vol), 14)}${intents}`;
+      const shown = recentIntents.slice(0, 6);
+      for (const intent of shown) {
+        const line =
+          `  ${fmt.pad(intent.currency, 10)}` +
+          `${fmt.pad(fmt.usd(intent.amountUsd), 14)}` +
+          `${fmt.pad(intent.status, 12)}` +
+          `${intent.verifier.slice(0, 10)}`;
         const visible = line.replace(/\x1b\[\d+m/g, "");
         const pad = Math.max(0, W - visible.length + 2);
         console.log(`  │${line}${" ".repeat(pad)}│`);
