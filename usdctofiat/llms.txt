@@ -1,0 +1,125 @@
+# @usdctofiat/offramp
+
+USDC-to-fiat offramp SDK for Base. Create delegated deposits in one function call.
+
+## SDK
+
+Package: @usdctofiat/offramp (npm)
+Install: npm install @usdctofiat/offramp
+
+```ts
+import { Offramp } from "@usdctofiat/offramp";
+const offramp = new Offramp();
+```
+
+## Methods
+
+Deposits:
+- offramp.createDeposit(walletClient, params, onProgress?) - create a delegated offramp deposit (approve → register → deposit → confirm → delegate). Returns { depositId, txHash }
+- offramp.getDeposits(walletAddress) - list all deposits for an address. Returns DepositInfo[] with status, balance, fills, delegation state
+- offramp.withdrawDeposit(walletClient, depositId, escrowAddress?) - close a deposit and withdraw remaining USDC. Returns tx hash
+
+Discovery:
+- offramp.getPlatforms() - list supported payment platforms with currencies, identifier labels, helper text
+- offramp.getCurrencies(platform) - get supported currency codes for a platform
+- offramp.validateIdentifier(platform, identifier) - validate and normalize a payment identifier. Returns { valid, normalized, error? }
+
+## React Hook
+
+```ts
+import { useOfframp } from "@usdctofiat/offramp/react";
+const { createDeposit, getDeposits, withdrawDeposit, step, txHash, depositId, error, isLoading, reset, getPlatforms, getCurrencies, validateIdentifier } = useOfframp();
+```
+
+## Types
+
+```ts
+type Platform = "venmo" | "cashapp" | "chime" | "revolut" | "wise" | "mercadopago" | "zelle" | "paypal" | "monzo" | "n26";
+
+interface OfframpParams {
+  amount: string;      // USDC decimal, min 10
+  platform: Platform;
+  currency: string;    // ISO 4217 code
+  identifier: string;  // platform-specific username/email
+}
+
+interface OfframpResult { depositId: string; txHash: string; }
+
+type OfframpStep = "approving" | "registering" | "depositing" | "confirming" | "delegating" | "done";
+
+interface OfframpProgress { step: OfframpStep; txHash?: string; depositId?: string; }
+
+interface PlatformInfo {
+  id: Platform;
+  name: string;
+  currencies: string[];
+  identifierLabel: string;
+  identifierPlaceholder: string;
+  helperText: string;
+}
+
+type DepositStatus = "active" | "empty" | "closed";
+
+interface DepositInfo {
+  depositId: string;
+  compositeId: string;
+  status: DepositStatus;
+  remainingUsdc: number;
+  outstandingUsdc: number;
+  totalTakenUsdc: number;
+  fulfilledIntents: number;
+  paymentMethods: string[];
+  currencies: string[];
+  rateSource: string;
+  delegated: boolean;
+  escrowAddress: string;
+}
+```
+
+## Errors
+
+```ts
+import { OfframpError } from "@usdctofiat/offramp";
+// error.code: "VALIDATION" | "APPROVAL_FAILED" | "REGISTRATION_FAILED" | "DEPOSIT_FAILED" | "CONFIRMATION_FAILED" | "DELEGATION_FAILED" | "USER_CANCELLED" | "UNSUPPORTED"
+// error.step?: OfframpStep (which step failed)
+// error.txHash?: string (if deposit was created on-chain)
+// error.depositId?: string (if deposit was confirmed but delegation failed)
+```
+
+## How It Works
+
+createDeposit executes 3 wallet transactions:
+1. Approve USDC allowance on the escrow contract
+2. Create deposit on-chain with payment method, currency, and order limits
+3. Delegate to the Delegate vault for automatic rate management
+
+Each step requires a wallet signature. The SDK handles orchestration and reports progress via onProgress callback.
+
+All deposits are:
+- Delegated to the USDCtoFiat Delegate vault (mandatory)
+- Market-tracking via oracle-based pricing (no manual rate setting)
+- Auto-closing when fully filled (retainOnEmpty: false)
+- Attributed to Galleon Labs via ERC-8021
+- On Base network (chain ID 8453)
+
+## Supported Platforms
+
+| Platform | Currencies | Identifier |
+|----------|-----------|-----------|
+| Revolut | 23 currencies (USD, EUR, GBP, SGD, NZD, AUD, CAD, HKD, MXN, SAR, AED, THB, TRY, PLN, CHF, ZAR, CZK, CNY, DKK, HUF, NOK, RON, SEK) | Revtag |
+| Wise | 30+ currencies | Wisetag |
+| PayPal | USD, EUR, GBP, SGD, NZD, AUD, CAD | Email |
+| Venmo | USD | Username |
+| Cash App | USD | Cashtag |
+| Zelle | USD | Email |
+| Monzo | GBP | Username |
+| N26 | EUR | IBAN |
+| Chime | USD | ChimeSign |
+| Mercado Pago | ARS | CVU |
+
+## Links
+
+- npm: https://www.npmjs.com/package/@usdctofiat/offramp
+- usdctofiat.xyz: https://usdctofiat.xyz
+- Delegate vault: https://delegate.usdctofiat.xyz
+- Protocol: https://zkp2p.xyz
