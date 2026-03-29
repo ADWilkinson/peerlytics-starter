@@ -161,12 +161,21 @@ cp .env.example .env
 
 ## Links
 
-- [usdctofiat.xyz](https://usdctofiat.xyz) — USDC offramp app
-- [delegate.usdctofiat.xyz](https://delegate.usdctofiat.xyz) — Delegate vault
-- [peerlytics.xyz/developers](https://peerlytics.xyz/developers) — Peerlytics API
-- [@usdctofiat/offramp on npm](https://www.npmjs.com/package/@usdctofiat/offramp)
-- [@peerlytics/sdk on npm](https://www.npmjs.com/package/@peerlytics/sdk)
-- [zkp2p.xyz](https://zkp2p.xyz) — Protocol
+**Products**
+
+[usdctofiat.xyz](https://usdctofiat.xyz) · [delegate.usdctofiat.xyz](https://delegate.usdctofiat.xyz) · [peerlytics.xyz](https://peerlytics.xyz) · [orderbook.peerlytics.xyz](https://orderbook.peerlytics.xyz)
+
+**SDKs**
+
+[@usdctofiat/offramp](https://www.npmjs.com/package/@usdctofiat/offramp) · [@peerlytics/sdk](https://www.npmjs.com/package/@peerlytics/sdk)
+
+**Social**
+
+[@usdctofiat](https://x.com/usdctofiat) · [@davyjones0x](https://x.com/davyjones0x)
+
+**Protocol**
+
+[zkp2p.xyz](https://zkp2p.xyz) · [peer.xyz](https://peer.xyz)
 
 ## License
 
