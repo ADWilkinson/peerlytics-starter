@@ -1,17 +1,15 @@
 /**
  * platform-explorer.ts
  *
- * Displays all supported payment platforms, their currencies, and
- * identifier requirements. Useful for building deposit UIs.
+ * Browse all supported platforms, currencies, and validation rules.
+ * Pure data — no wallet or API key needed.
  *
  * Usage:
  *   npx tsx usdctofiat/platform-explorer.ts
- *   npx tsx usdctofiat/platform-explorer.ts revolut     # single platform detail
+ *   npx tsx usdctofiat/platform-explorer.ts REVOLUT
  */
 
-import { Offramp, type PlatformInfo, type Platform } from "@usdctofiat/offramp";
-
-// ── Formatting ──────────────────────────────────────────────────────
+import { PLATFORMS, CURRENCIES } from "@usdctofiat/offramp";
 
 const fmt = {
   dim: (s: string) => `\x1b[2m${s}\x1b[0m`,
@@ -25,73 +23,64 @@ const fmt = {
   },
 };
 
-// ── Main ────────────────────────────────────────────────────────────
-
 function main() {
-  const offramp = new Offramp();
-  const platforms = offramp.getPlatforms();
-  const filterPlatform = process.argv[2]?.toLowerCase();
+  const all = Object.entries(PLATFORMS);
+  const filterKey = process.argv[2]?.toUpperCase();
 
   console.log();
   console.log(fmt.bold("  Supported Platforms"));
-  console.log(fmt.dim(`  @usdctofiat/offramp · ${platforms.length} platforms`));
+  console.log(fmt.dim(`  @usdctofiat/offramp · ${all.length} platforms · ${Object.keys(CURRENCIES).length} currencies`));
   console.log();
 
-  if (filterPlatform) {
-    const platform = platforms.find((p) => p.id === filterPlatform);
-    if (!platform) {
-      console.log(fmt.dim(`  Platform "${filterPlatform}" not found.`));
-      console.log(fmt.dim(`  Available: ${platforms.map((p) => p.id).join(", ")}`));
+  if (filterKey) {
+    const entry = (PLATFORMS as Record<string, (typeof all)[number][1]>)[filterKey];
+    if (!entry) {
+      console.log(fmt.dim(`  Key "${filterKey}" not found. Available: ${all.map(([k]) => k).join(", ")}`));
       console.log();
       return;
     }
-    printPlatformDetail(offramp, platform);
+    printDetail(filterKey, entry);
     return;
   }
 
-  // Overview table
-  for (const p of platforms) {
+  for (const [key, p] of all) {
     const name = fmt.pad(fmt.bold(p.name), 20);
     const count = fmt.pad(fmt.cyan(`${p.currencies.length} currencies`), 22);
-    const label = fmt.dim(p.identifierLabel);
-    console.log(`  ${name} ${count} ${label}`);
+    const label = fmt.dim(p.identifier.label);
+    console.log(`  ${fmt.dim(key.padEnd(14))} ${name} ${count} ${label}`);
   }
 
   console.log();
-  console.log(fmt.dim("  Run with a platform name for detail: npx tsx usdctofiat/platform-explorer.ts revolut"));
+  console.log(fmt.dim("  Detail: npx tsx usdctofiat/platform-explorer.ts REVOLUT"));
   console.log();
 }
 
-function printPlatformDetail(offramp: Offramp, p: PlatformInfo) {
-  console.log(`  ${fmt.bold(p.name)} ${fmt.dim(`(${p.id})`)}`);
+function printDetail(key: string, p: (typeof PLATFORMS)[keyof typeof PLATFORMS]) {
+  console.log(`  ${fmt.bold(p.name)} ${fmt.dim(`(PLATFORMS.${key})`)}`);
   console.log();
-  console.log(`  Identifier:   ${p.identifierLabel}`);
-  console.log(`  Placeholder:  ${fmt.dim(p.identifierPlaceholder)}`);
-  console.log(`  Help:         ${fmt.dim(p.helperText)}`);
+  console.log(`  Identifier:   ${p.identifier.label}`);
+  console.log(`  Placeholder:  ${fmt.dim(p.identifier.placeholder)}`);
+  console.log(`  Help:         ${fmt.dim(p.identifier.help)}`);
   console.log();
-  console.log(`  Currencies ${fmt.dim(`(${p.currencies.length})`)}:`);
 
   const cols = 6;
+  console.log(`  Currencies ${fmt.dim(`(${p.currencies.length})`)}:`);
   for (let i = 0; i < p.currencies.length; i += cols) {
-    const row = p.currencies.slice(i, i + cols).map((c) => fmt.pad(c, 6)).join("");
+    const row = p.currencies.slice(i, i + cols).map((c) => {
+      const info = (CURRENCIES as Record<string, { symbol: string }>)[c];
+      return fmt.pad(`${c} ${fmt.dim(info?.symbol ?? "")}`, 10);
+    }).join("");
     console.log(`    ${row}`);
   }
 
-  // Validation examples
   console.log();
   console.log(`  Validation:`);
-  const examples = [
-    { input: "alice", label: "plain" },
-    { input: "@alice", label: "with @" },
-    { input: "", label: "empty" },
-  ];
-  for (const ex of examples) {
-    const result = offramp.validateIdentifier(p.id as Platform, ex.input);
+  for (const [input, label] of [["alice", "plain"], ["@alice", "with @"], ["", "empty"]] as const) {
+    const result = p.validate(input);
     const icon = result.valid ? fmt.green("✓") : fmt.yellow("✗");
-    const norm = result.valid ? fmt.dim(` → "${result.normalized}"`) : fmt.dim(` ${result.error}`);
-    console.log(`    ${icon} "${ex.input}" ${fmt.dim(`(${ex.label})`)}${norm}`);
+    const detail = result.valid ? fmt.dim(` → "${result.normalized}"`) : fmt.dim(` ${result.error}`);
+    console.log(`    ${icon} "${input}" ${fmt.dim(`(${label})`)}${detail}`);
   }
-
   console.log();
 }
 

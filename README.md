@@ -38,35 +38,43 @@ npx tsx usdctofiat/create-deposit.ts
 Package: [`@usdctofiat/offramp`](https://www.npmjs.com/package/@usdctofiat/offramp)
 
 ```ts
-import { Offramp, PAYMENT_PLATFORMS, CURRENCIES } from "@usdctofiat/offramp";
+import { offramp, deposits, close, PLATFORMS, CURRENCIES } from "@usdctofiat/offramp";
 
-const offramp = new Offramp();
-const result = await offramp.createDeposit(walletClient, {
+// Create a deposit (resumable — call again to retry delegation)
+const result = await offramp(walletClient, {
   amount: "100",
-  platform: PAYMENT_PLATFORMS.REVOLUT,
+  platform: PLATFORMS.REVOLUT,
   currency: CURRENCIES.EUR,
   identifier: "alice",
 });
+
+// List deposits (read-only, no wallet needed)
+const list = await deposits("0xYourAddress");
+
+// Close a deposit
+await close(walletClient, "361");
+
+// Platform and currency data — no function calls, just constants
+PLATFORMS.REVOLUT.currencies    // ["USD", "EUR", ...]
+PLATFORMS.REVOLUT.validate("@alice")  // { valid: true, normalized: "alice" }
+CURRENCIES.EUR.symbol           // "€"
 ```
 
-| Method | Returns |
-|--------|---------|
-| `createDeposit(walletClient, params, onProgress?)` | `{ depositId, txHash }` |
-| `getDeposits(walletAddress)` | `DepositInfo[]` with status, balance, fills, txHash |
-| `getDepositByTxHash(walletAddress, txHash)` | `DepositInfo \| null` |
-| `delegateDeposit(walletClient, depositId)` | Tx hash |
-| `withdrawDeposit(walletClient, depositId, escrowAddress?)` | Tx hash |
-| `getPlatforms()` | Supported platforms with currencies, labels, helperText |
-| `getCurrencies(platform)` | Currency codes for a platform |
-| `getCurrencyInfo(code)` | `{ code, name, symbol, countryCode }` |
-| `getAllCurrencies()` | All currencies with metadata |
-| `validateIdentifier(platform, identifier)` | `{ valid, normalized, error? }` |
+| Export | What it does |
+|--------|-------------|
+| `offramp(walletClient, params, onProgress?)` | Create deposit + delegate. Resumable. Returns `{ depositId, txHash, resumed }` |
+| `deposits(walletAddress)` | List deposits (read-only). Returns `DepositInfo[]` |
+| `close(walletClient, depositId)` | Withdraw and close. Returns tx hash |
+| `PLATFORMS` | Rich const: `.REVOLUT.currencies`, `.REVOLUT.identifier`, `.REVOLUT.validate()` |
+| `CURRENCIES` | Rich const: `.EUR.symbol`, `.EUR.name`, `.EUR.countryCode` |
 
 React hook: `import { useOfframp } from "@usdctofiat/offramp/react"`
 
 ### How deposits work
 
-`createDeposit` orchestrates 5 steps, 3 of which are wallet transactions:
+`offramp()` is **resumable**. If an undelegated deposit exists for the wallet, it skips straight to delegation instead of creating a new one. This handles browser crashes, failed delegation, and retry scenarios automatically.
+
+The full flow orchestrates 5 steps, 3 of which are wallet transactions:
 
 1. **Approve** USDC allowance (wallet tx)
 2. **Register** payee details (API call, no signature)
@@ -74,7 +82,7 @@ React hook: `import { useOfframp } from "@usdctofiat/offramp/react"`
 4. **Confirm** deposit ID from receipt/indexer (automatic)
 5. **Delegate** to the Delegate vault (wallet tx)
 
-Steps 1, 3, and 5 each require a wallet signature. The SDK orchestrates the flow and reports progress via the `onProgress` callback.
+Steps 1, 3, and 5 each require a wallet signature. Progress is reported via `onProgress`.
 
 ### Supported platforms
 
