@@ -52,10 +52,14 @@ const result = await offramp.createDeposit(walletClient, {
 | Method | Returns |
 |--------|---------|
 | `createDeposit(walletClient, params, onProgress?)` | `{ depositId, txHash }` |
-| `getDeposits(walletAddress)` | `DepositInfo[]` with status, balance, fills |
+| `getDeposits(walletAddress)` | `DepositInfo[]` with status, balance, fills, txHash |
+| `getDepositByTxHash(walletAddress, txHash)` | `DepositInfo \| null` |
+| `delegateDeposit(walletClient, depositId)` | Tx hash |
 | `withdrawDeposit(walletClient, depositId, escrowAddress?)` | Tx hash |
-| `getPlatforms()` | Supported platforms with currencies |
+| `getPlatforms()` | Supported platforms with currencies, labels, helperText |
 | `getCurrencies(platform)` | Currency codes for a platform |
+| `getCurrencyInfo(code)` | `{ code, name, symbol, countryCode }` |
+| `getAllCurrencies()` | All currencies with metadata |
 | `validateIdentifier(platform, identifier)` | `{ valid, normalized, error? }` |
 
 React hook: `import { useOfframp } from "@usdctofiat/offramp/react"`

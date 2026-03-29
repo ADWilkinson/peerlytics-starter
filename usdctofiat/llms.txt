@@ -5,7 +5,7 @@ USDC-to-fiat offramp SDK for Base. Create delegated deposits in one function cal
 ## SDK
 
 Package: @usdctofiat/offramp (npm)
-Install: npm install @usdctofiat/offramp
+Install: bun add @usdctofiat/offramp
 
 ```ts
 import { Offramp, PAYMENT_PLATFORMS, CURRENCIES } from "@usdctofiat/offramp";
@@ -16,7 +16,9 @@ const offramp = new Offramp();
 
 Deposits:
 - offramp.createDeposit(walletClient, params, onProgress?) - create a delegated offramp deposit (approve → register → deposit → confirm → delegate). Returns { depositId, txHash }
-- offramp.getDeposits(walletAddress) - list all deposits for an address. Returns DepositInfo[] with status, balance, fills, delegation state
+- offramp.getDeposits(walletAddress) - list all deposits for an address (read-only, no wallet needed). Returns DepositInfo[]
+- offramp.getDepositByTxHash(walletAddress, txHash) - find a deposit by its creation tx hash. Returns DepositInfo | null. Use to recover from CONFIRMATION_FAILED errors
+- offramp.delegateDeposit(walletClient, depositId, escrowAddress?) - delegate an existing deposit to the vault. Use to retry DELEGATION_FAILED or delegate deposits created elsewhere. Returns tx hash
 - offramp.withdrawDeposit(walletClient, depositId, escrowAddress?) - close a deposit and withdraw remaining USDC. Returns tx hash
 
 Discovery:
@@ -30,7 +32,12 @@ Discovery:
 
 ```ts
 import { useOfframp } from "@usdctofiat/offramp/react";
-const { createDeposit, getDeposits, withdrawDeposit, step, txHash, depositId, error, isLoading, reset, getPlatforms, getCurrencies, validateIdentifier } = useOfframp();
+const {
+  createDeposit, getDeposits, getDepositByTxHash, delegateDeposit, withdrawDeposit,
+  step, txHash, depositId, error, isLoading, reset,
+  getPlatforms, getCurrencies, getCurrencyInfo, getAllCurrencies, validateIdentifier,
+} = useOfframp();
+// error is OfframpError | null (not string) — has .code, .step, .txHash, .depositId
 ```
 
 ## Typed Constants
@@ -61,7 +68,7 @@ interface OfframpProgress { step: OfframpStep; txHash?: string; depositId?: stri
 interface PlatformInfo {
   id: Platform;
   name: string;
-  currencies: string[];
+  currencies: Currency[];
   identifierLabel: string;
   identifierPlaceholder: string;
   helperText: string;
@@ -77,8 +84,9 @@ interface CurrencyInfo {
 type DepositStatus = "active" | "empty" | "closed";
 
 interface DepositInfo {
-  depositId: string;
-  compositeId: string;
+  depositId: string;      // pass this to delegateDeposit/withdrawDeposit
+  compositeId: string;    // escrowAddress_depositId format
+  txHash?: string;        // creation transaction hash
   status: DepositStatus;
   remainingUsdc: number;
   outstandingUsdc: number;
@@ -102,6 +110,11 @@ import { OfframpError } from "@usdctofiat/offramp";
 // error.depositId?: string (if deposit was confirmed but delegation failed)
 ```
 
+Recovery patterns:
+- DELEGATION_FAILED: call offramp.delegateDeposit(walletClient, error.depositId) to retry
+- CONFIRMATION_FAILED: call offramp.getDepositByTxHash(walletAddress, error.txHash) to find the deposit
+- USER_CANCELLED: silently reset UI, no action needed
+
 ## How It Works
 
 createDeposit orchestrates 5 steps, 3 of which are wallet transactions:
@@ -124,8 +137,8 @@ All deposits are:
 
 | Platform | Currencies | Identifier |
 |----------|-----------|-----------|
-| Revolut | 23 currencies (USD, EUR, GBP, SGD, NZD, AUD, CAD, HKD, MXN, SAR, AED, THB, TRY, PLN, CHF, ZAR, CZK, CNY, DKK, HUF, NOK, RON, SEK) | Revtag |
-| Wise | 30+ currencies | Wisetag |
+| Revolut | 24 currencies (USD, EUR, GBP, SGD, NZD, AUD, CAD, HKD, MXN, SAR, AED, THB, TRY, PLN, CHF, ZAR, CZK, CNY, DKK, HUF, JPY, NOK, RON, SEK) | Revtag |
+| Wise | 31 currencies | Wisetag |
 | PayPal | USD, EUR, GBP, SGD, NZD, AUD, CAD | Email |
 | Venmo | USD | Username |
 | Cash App | USD | Cashtag |
@@ -141,3 +154,4 @@ All deposits are:
 - usdctofiat.xyz: https://usdctofiat.xyz
 - Delegate vault: https://delegate.usdctofiat.xyz
 - Protocol: https://zkp2p.xyz
+- @usdctofiat: https://x.com/usdctofiat

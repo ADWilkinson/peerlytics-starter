@@ -99,26 +99,41 @@ await offramp.createDeposit(walletClient, params, (progress) => {
 ```typescript
 // List deposits (read-only, no wallet needed)
 const deposits = await offramp.getDeposits("0xWalletAddress");
-// Returns: DepositInfo[] with status, remainingUsdc, fulfilledIntents, delegated, etc.
+// Returns: DepositInfo[] with status, remainingUsdc, fulfilledIntents, delegated, txHash, etc.
+
+// Find deposit by tx hash (recovery from CONFIRMATION_FAILED)
+const deposit = await offramp.getDepositByTxHash("0xWalletAddress", "0xTxHash...");
+
+// Delegate an existing deposit to the vault (retry or first-time)
+const txHash = await offramp.delegateDeposit(walletClient, "42");
 
 // Close and withdraw
-const txHash = await offramp.withdrawDeposit(walletClient, "42");
+const closeTxHash = await offramp.withdrawDeposit(walletClient, "42");
 ```
 
-## Platform discovery
+## Platform and currency discovery
 
 ```typescript
-const platforms = offramp.getPlatforms();
-// [{ id: "revolut", name: "Revolut", currencies: ["USD","EUR",...], identifierLabel: "Revtag", ... }]
+import { PAYMENT_PLATFORMS, CURRENCIES } from "@usdctofiat/offramp";
 
-const currencies = offramp.getCurrencies("wise");
+const platforms = offramp.getPlatforms();
+// [{ id: "revolut", name: "Revolut", currencies: ["USD","EUR",...], identifierLabel: "Revtag", helperText: "...", ... }]
+
+const currencies = offramp.getCurrencies(PAYMENT_PLATFORMS.WISE);
 // ["USD", "EUR", "GBP", ...]
 
-const result = offramp.validateIdentifier("revolut", "@alice");
+// Currency metadata for UI rendering
+offramp.getCurrencyInfo(CURRENCIES.EUR);
+// { code: "EUR", name: "Euro", symbol: "€", countryCode: "eu" }
+
+offramp.getAllCurrencies();
+// [{ code: "AED", name: "UAE Dirham", symbol: "د.إ", ... }, ...]
+
+offramp.validateIdentifier(PAYMENT_PLATFORMS.REVOLUT, "@alice");
 // { valid: true, normalized: "alice" }
 ```
 
-## Error handling
+## Error handling and recovery
 
 ```typescript
 import { OfframpError } from "@usdctofiat/offramp";
@@ -131,13 +146,22 @@ try {
       case "USER_CANCELLED": return; // silently reset
       case "VALIDATION": showError(err.message); break;
       case "DELEGATION_FAILED":
-        // Deposit exists but isn't delegated
-        showWarning(`Deposit ${err.depositId} created. Manage at usdctofiat.xyz`);
+        // Deposit exists but isn't delegated — retry delegation
+        await offramp.delegateDeposit(walletClient, err.depositId!);
+        break;
+      case "CONFIRMATION_FAILED":
+        // Deposit is on-chain but ID unknown — find it by tx hash
+        const deposit = await offramp.getDepositByTxHash(walletAddress, err.txHash!);
+        if (deposit) await offramp.delegateDeposit(walletClient, deposit.depositId);
         break;
       default: showError(err.message);
     }
   }
 }
+
+// React hook: error is OfframpError (not string) — access .code, .step, .txHash, .depositId directly
+const { error } = useOfframp();
+if (error?.code === "DELEGATION_FAILED") { /* retry with error.depositId */ }
 ```
 
 ## Key constraints
