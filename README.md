@@ -29,6 +29,7 @@ npx tsx usdctofiat/create-deposit.ts
 |--------|-------------|
 | [`create-deposit.ts`](usdctofiat/create-deposit.ts) | Creates a delegated offramp deposit (approve → deposit → delegate) |
 | [`manage-deposits.ts`](usdctofiat/manage-deposits.ts) | Lists deposits with status, balance, fills, delegation state |
+| [`resume-deposit.ts`](usdctofiat/resume-deposit.ts) | Demonstrates resumable flow — detects undelegated deposits and delegates them |
 | [`close-deposit.ts`](usdctofiat/close-deposit.ts) | Withdraws remaining USDC and closes a deposit |
 | [`platform-explorer.ts`](usdctofiat/platform-explorer.ts) | Browse supported platforms, currencies, and validation rules |
 | [`react-example.tsx`](usdctofiat/react-example.tsx) | Copy-paste React component with useOfframp hook |

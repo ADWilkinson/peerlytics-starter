@@ -7,6 +7,7 @@
     "usdctofiat:create": "npx tsx usdctofiat/create-deposit.ts",
     "usdctofiat:deposits": "npx tsx usdctofiat/manage-deposits.ts",
     "usdctofiat:close": "npx tsx usdctofiat/close-deposit.ts",
+    "usdctofiat:resume": "npx tsx usdctofiat/resume-deposit.ts",
     "usdctofiat:platforms": "npx tsx usdctofiat/platform-explorer.ts",
     "peerlytics:dashboard": "npx tsx peerlytics/volume-dashboard.ts",
     "peerlytics:rates": "npx tsx peerlytics/rate-monitor.ts",
