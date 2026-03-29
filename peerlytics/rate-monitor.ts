@@ -5,7 +5,7 @@
  * available rate crosses a configurable threshold.
  *
  * Usage:
- *   PEERLYTICS_API_KEY=pk_live_... npx tsx rate-monitor.ts
+ *   PEERLYTICS_API_KEY=pk_live_... npx tsx peerlytics/rate-monitor.ts
  *
  * Environment:
  *   PEERLYTICS_API_KEY  - API key (get one at peerlytics.xyz/developers)

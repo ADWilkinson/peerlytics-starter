@@ -1,6 +1,6 @@
-# peerlytics-starter
+# @peerlytics/sdk
 
-TypeScript examples for the Peerlytics API. Query ZKP2P P2P protocol data on Base.
+Query ZKP2P P2P protocol data on Base: rates, orderbooks, maker portfolios, and live activity.
 
 ## SDK
 

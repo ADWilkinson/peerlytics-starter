@@ -44,7 +44,7 @@ const result = await offramp.createDeposit(walletClient, {
 ## Core pattern — React
 
 ```typescript
-import { useOfframp } from "@usdctofiat/offramp/react";
+import { useOfframp, type OfframpError } from "@usdctofiat/offramp/react";
 
 function SellButton({ walletClient }) {
   const { createDeposit, step, isLoading, error, reset } = useOfframp();
@@ -58,8 +58,9 @@ function SellButton({ walletClient }) {
         identifier: "alice",
       });
     } catch (err) {
-      if (err.code === "USER_CANCELLED") return;
-      console.error(err.message);
+      const offrampError = err as OfframpError;
+      if (offrampError.code === "USER_CANCELLED") return;
+      console.error(offrampError.message);
     }
   };
 

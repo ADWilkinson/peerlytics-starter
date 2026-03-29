@@ -12,7 +12,7 @@
  *   4. Demonstrates the retry with payment header
  *
  * Usage:
- *   npx tsx x402-agent.ts
+ *   npx tsx peerlytics/x402-agent.ts
  *
  * For a full working payment flow, install:
  *   npm install @x402/evm viem

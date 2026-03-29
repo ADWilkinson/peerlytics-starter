@@ -5,7 +5,7 @@
  * deposits, profit, estimated APR, and platform breakdown.
  *
  * Usage:
- *   PEERLYTICS_API_KEY=pk_live_... npx tsx maker-report.ts 0x1234...
+ *   PEERLYTICS_API_KEY=pk_live_... npx tsx peerlytics/maker-report.ts 0x1234...
  *
  * Environment:
  *   PEERLYTICS_API_KEY  - API key (get one at peerlytics.xyz/developers)
@@ -65,8 +65,8 @@ async function main(): Promise<void> {
   const address = process.argv[2];
 
   if (!address) {
-    console.error("Usage: npx tsx maker-report.ts <address>");
-    console.error("  e.g. npx tsx maker-report.ts 0xC141Cbe4f4a9CAbc3cc78159a9268a4e008922CD");
+    console.error("Usage: npx tsx peerlytics/maker-report.ts <address>");
+    console.error("  e.g. npx tsx peerlytics/maker-report.ts 0xC141Cbe4f4a9CAbc3cc78159a9268a4e008922CD");
     process.exit(1);
   }
 

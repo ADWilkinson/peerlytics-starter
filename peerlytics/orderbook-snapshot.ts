@@ -5,7 +5,7 @@
  * displays depth by rate level with total liquidity per market.
  *
  * Usage:
- *   PEERLYTICS_API_KEY=pk_live_... npx tsx orderbook-snapshot.ts
+ *   PEERLYTICS_API_KEY=pk_live_... npx tsx peerlytics/orderbook-snapshot.ts
  *
  * Environment:
  *   PEERLYTICS_API_KEY  - API key (get one at peerlytics.xyz/developers)

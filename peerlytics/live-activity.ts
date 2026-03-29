@@ -5,7 +5,7 @@
  * (signals, fills, rate updates) with color-coded output.
  *
  * Usage:
- *   PEERLYTICS_API_KEY=pk_live_... npx tsx live-activity.ts
+ *   PEERLYTICS_API_KEY=pk_live_... npx tsx peerlytics/live-activity.ts
  *
  * Environment:
  *   PEERLYTICS_API_KEY  - API key (get one at peerlytics.xyz/developers)

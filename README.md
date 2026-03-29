@@ -5,8 +5,8 @@ TypeScript examples for integrating USDC-to-fiat offramps and querying ZKP2P pro
 ## Quick start
 
 ```bash
-git clone https://github.com/ADWilkinson/peerlytics-starter.git
-cd peerlytics-starter
+git clone https://github.com/ADWilkinson/usdctofiat-peerlytics-starters.git
+cd usdctofiat-peerlytics-starters
 npm install
 ```
 
@@ -58,13 +58,15 @@ React hook: `import { useOfframp } from "@usdctofiat/offramp/react"`
 
 ### How deposits work
 
-`createDeposit` executes 3 wallet transactions in sequence:
+`createDeposit` orchestrates 6 steps, 3 of which are wallet transactions:
 
-1. **Approve** USDC allowance on the escrow contract
-2. **Create deposit** on-chain with payment method, currency, and order limits
-3. **Delegate** to the Delegate vault for automatic rate management
+1. **Approve** USDC allowance (wallet tx)
+2. **Register** payee details (API call, no signature)
+3. **Create deposit** on-chain (wallet tx)
+4. **Confirm** deposit ID from receipt/indexer (automatic)
+5. **Delegate** to the Delegate vault (wallet tx)
 
-Each step requires a wallet signature. The SDK orchestrates the flow and reports progress via the `onProgress` callback.
+Steps 1, 3, and 5 each require a wallet signature. The SDK orchestrates the flow and reports progress via the `onProgress` callback.
 
 ### Supported platforms
 

@@ -6,7 +6,7 @@
  * top 5 makers and takers.
  *
  * Usage:
- *   PEERLYTICS_API_KEY=pk_live_... npx tsx volume-dashboard.ts
+ *   PEERLYTICS_API_KEY=pk_live_... npx tsx peerlytics/volume-dashboard.ts
  */
 
 import { Peerlytics, PeerlyticsError } from "@peerlytics/sdk";
