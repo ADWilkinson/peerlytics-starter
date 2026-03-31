@@ -62,7 +62,7 @@ const client = new Peerlytics({
 
 async function main(): Promise<void> {
   const [summary, leaderboard] = await Promise.all([
-    client.getSummary(),
+    client.getProtocolSummary(),
     client.getLeaderboard({ limit: 5 }),
   ]);
 
@@ -70,11 +70,11 @@ async function main(): Promise<void> {
 
   // Protocol summary
   box("Protocol Summary");
-  row("Total Volume", fmt.green(fmt.usd(summary.periods.mtd.metrics.volume)));
-  row("Active Liquidity", fmt.usd(summary.liquidity.available));
-  row("Active Deposits", String(summary.liquidity.activeDeposits));
-  row("Unique Users", String(summary.periods.mtd.metrics.uniqueUsers));
-  row("Success Rate", `${(summary.periods.mtd.metrics.successRate * 100).toFixed(1)}%`);
+  row("Total Volume", fmt.green(fmt.usd(summary.mtd.settledVolumeUsd)));
+  row("Active Liquidity", fmt.usd(summary.mtd.activeLiquidityUsd));
+  row("Active Deposits", String(summary.mtd.activeDeposits));
+  row("Unique Users", String(summary.mtd.uniqueParticipants));
+  row("Success Rate", `${summary.mtd.successRatePct.toFixed(1)}%`);
   bottom();
 
   console.log();

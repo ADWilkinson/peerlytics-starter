@@ -120,7 +120,7 @@ const client = new Peerlytics({ apiKey: "pk_live_..." });
 
 | Method | Returns |
 |--------|---------|
-| `getSummary()` | Protocol volume, liquidity, deposit count, spreads |
+| `getProtocolSummary()` | Protocol MTD/QTD/YTD volume, liquidity, deposits |
 | `getLeaderboard({ limit? })` | Top makers/takers by volume, APR, profit |
 | `getMarketSummary({ currency? })` | Rate stats per platform/currency pair |
 | `getOrderbook({ currency? })` | Live orderbook grouped by rate level |

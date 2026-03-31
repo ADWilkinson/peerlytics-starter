@@ -40,8 +40,8 @@ const client = new Peerlytics({ apiKey: "pk_live_..." });
 
 ### Protocol overview
 ```typescript
-const summary = await client.getSummary();
-// { totalVolume, totalDeposits, totalIntents, averageSpread, totalLiquidity, ... }
+const summary = await client.getProtocolSummary();
+// { mtd: { settledVolumeUsd, activeLiquidityUsd, activeDeposits, ... }, allTime: { ... } }
 ```
 
 ### Exchange rates
@@ -83,9 +83,9 @@ const vaults = await client.getVaultsOverview();
 ## Full method reference
 
 Analytics:
-- `getSummary()` — protocol volume, liquidity, deposits, spreads
+- `getProtocolSummary()` — protocol MTD/QTD/YTD/all-time volume, liquidity, deposits
 - `getLeaderboard({ limit?, offset? })` — top makers/takers by volume, APR, profit
-- `getPeriod(range)` — dashboard data for mtd, 3mtd, ytd, all
+- `getProtocolOverview(range)` — full analytics overview for mtd, 3mtd, ytd, all
 
 Market:
 - `getMarketSummary({ currency?, platform? })` — rate stats per pair

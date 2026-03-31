@@ -15,11 +15,9 @@ const client = new Peerlytics({ apiKey: "pk_live_..." }); // required (each key 
 ## Methods
 
 Analytics:
-- client.getSummary() - protocol volume, liquidity, deposits, spreads
+- client.getProtocolSummary() - protocol MTD/QTD/YTD/all-time volume, liquidity, deposits
 - client.getLeaderboard({ limit?, offset? }) - top makers/takers by volume, APR, profit
-- client.getPeriod(range) - dashboard data for mtd, 3mtd, ytd, all
-- client.getAttribution() - intent attribution
-- client.getDepositAttribution() - deposit attribution
+- client.getProtocolOverview(range) - full analytics overview for mtd, 3mtd, ytd, all
 
 Market:
 - client.getMarketSummary({ currency?, platform? }) - rate stats per pair
