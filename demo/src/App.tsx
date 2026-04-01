@@ -46,7 +46,7 @@ type AllowedPlatformId = (typeof allowedMarkets)[number]["platform"]["id"];
 
 const flowSteps = [
   { id: "approving", label: "Approve" },
-  { id: "registering", label: "Payout" },
+  { id: "registering", label: "Register" },
   { id: "depositing", label: "Deposit" },
   { id: "confirming", label: "Confirm" },
   { id: "delegating", label: "Delegate" },
@@ -99,7 +99,7 @@ export default function App() {
   const [selectedPlatformId, setSelectedPlatformId] = useState<AllowedPlatformId>(
     PLATFORMS.REVOLUT.id,
   );
-  const [selectedCurrencyCode, setSelectedCurrencyCode] = useState(CURRENCIES.GBP.code);
+  const [selectedCurrencyCode, setSelectedCurrencyCode] = useState(CURRENCIES.USD.code);
   const [amount, setAmount] = useState("100");
   const [identifier, setIdentifier] = useState("");
 
@@ -119,9 +119,13 @@ export default function App() {
   const [copiedPeerlyticsCode, setCopiedPeerlyticsCode] = useState(false);
   const [copiedOfframpCode, setCopiedOfframpCode] = useState(false);
 
+  const [closingDepositId, setClosingDepositId] = useState<string | null>(null);
+  const [closeError, setCloseError] = useState<string | null>(null);
+
   const {
     offramp,
     deposits: loadDeposits,
+    close: closeDeposit,
     step,
     error,
     txHash,
@@ -325,6 +329,20 @@ export default function App() {
       setDepositsError(getErrorMessage(refreshError));
     } finally {
       setIsDepositsLoading(false);
+    }
+  }
+
+  async function handleWithdraw(item: DepositInfo) {
+    if (!walletSession?.walletClient) return;
+    setClosingDepositId(item.depositId);
+    setCloseError(null);
+    try {
+      await closeDeposit(walletSession.walletClient, item.depositId, item.escrowAddress);
+      await refreshDeposits();
+    } catch (withdrawError) {
+      setCloseError(getErrorMessage(withdrawError));
+    } finally {
+      setClosingDepositId(null);
     }
   }
 
@@ -842,6 +860,10 @@ export default function App() {
             <InlineMessage tone="error">{depositsError}</InlineMessage>
           )}
 
+          {walletSession && closeError && (
+            <InlineMessage tone="error">{closeError}</InlineMessage>
+          )}
+
           {walletSession &&
             !depositsError &&
             activeDeposits.length === 0 &&
@@ -869,6 +891,16 @@ export default function App() {
                     >
                       {item.delegated ? "delegated" : "manual"}
                     </span>
+                    <button
+                      type="button"
+                      className="button button-withdraw"
+                      onClick={() => {
+                        void handleWithdraw(item);
+                      }}
+                      disabled={closingDepositId === item.depositId || item.remainingUsdc === 0}
+                    >
+                      {closingDepositId === item.depositId ? "Withdrawing..." : "Withdraw"}
+                    </button>
                   </div>
                 </div>
                 <div className="deposit-values">
