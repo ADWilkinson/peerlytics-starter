@@ -63,12 +63,21 @@ export function formatPercent(value: number | null | undefined): string {
   return `${percentFormatter.format(value)}%`;
 }
 
-export function formatRate(value: number | null | undefined): string {
+function getCurrencySymbol(code: string): string {
+  const symbols: Record<string, string> = { GBP: "£", USD: "$", EUR: "€" };
+  return symbols[code] ?? "";
+}
+
+export function formatRate(
+  value: number | null | undefined,
+  currencyCode?: string,
+): string {
   if (value == null || Number.isNaN(value)) {
     return "--";
   }
 
-  return `${value.toFixed(3)}x`;
+  const symbol = currencyCode ? getCurrencySymbol(currencyCode) : "";
+  return `${symbol}${value.toFixed(3)}`;
 }
 
 export function shortenAddress(value: string, visible = 4): string {

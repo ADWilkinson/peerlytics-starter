@@ -468,163 +468,7 @@ export default function App() {
           </div>
         </div>
 
-        {/* ── SDK Strip 1: Peerlytics ── */}
-        <section className="sdk-strip sdk-strip-peerlytics">
-          <div className="strip-left">
-            <div className="strip-meta">
-              <span className="sdk-pill badge-peerlytics">@peerlytics/sdk</span>
-              <a
-                href="https://www.npmjs.com/package/@peerlytics/sdk"
-                target="_blank"
-                rel="noreferrer"
-                className="sdk-docs-link"
-              >
-                npm ↗
-              </a>
-            </div>
-
-            <h3 className="strip-name">Peerlytics</h3>
-            <p className="strip-desc">
-              Real-time analytics for the ZKP2P protocol. Query live orderbook
-              data, activity feeds, and maker stats from your server with a single
-              API key.
-            </p>
-
-            <ul className="strip-features">
-              <li>Live orderbook with rate levels and depth</li>
-              <li>Activity feed with typed event filtering</li>
-              <li>Maker portfolio and volume analytics</li>
-            </ul>
-
-            <button
-              type="button"
-              className="install-cmd"
-              onClick={handleCopyPeerlyticsInstall}
-            >
-              <span className="install-prompt">$</span>
-              <span>npm install @peerlytics/sdk</span>
-              <span className="install-copy">
-                {copiedPeerlyticsInstall ? "✓ copied" : "copy"}
-              </span>
-            </button>
-
-            <div className="code-block strip-code">
-              <button
-                type="button"
-                className="code-copy-btn"
-                onClick={handleCopyPeerlyticsCode}
-              >
-                {copiedPeerlyticsCode ? "✓" : "copy"}
-              </button>
-              <pre>{PEERLYTICS_SNIPPET}</pre>
-            </div>
-          </div>
-
-          <div className="strip-demo">
-            <aside className="card">
-              <div className="section-head">
-                <h2>
-                  {routeLabel}
-                  {isOrderbookLoading && <span className="loading-dot" />}
-                </h2>
-                <div className="route-controls">
-                  <select
-                    className="route-select"
-                    value={selectedMarket.platform.id}
-                    onChange={(event) => {
-                      setSelectedPlatformId(event.target.value as AllowedPlatformId);
-                      setIdentifier("");
-                    }}
-                  >
-                    {allowedMarkets.map((entry) => (
-                      <option key={entry.platform.id} value={entry.platform.id}>
-                        {entry.platform.name}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    className="route-select"
-                    value={currency.code}
-                    onChange={(event) => setSelectedCurrencyCode(event.target.value)}
-                  >
-                    {currencyOptions.map((entry) => (
-                      <option key={entry.code} value={entry.code}>
-                        {entry.code}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {orderbookError && (
-                <InlineMessage tone="error">{orderbookError}</InlineMessage>
-              )}
-
-              <div className="book-summary">
-                <ValueTile
-                  label="Best rate"
-                  value={isOrderbookLoading ? "..." : formatRate(orderbookState.orderbook?.bestRate)}
-                  accent={!isOrderbookLoading && Boolean(orderbookState.orderbook?.bestRate)}
-                />
-                <ValueTile
-                  label="Liquidity"
-                  value={formatUsd(orderbookState.orderbook?.totalLiquidityUsd)}
-                />
-                <ValueTile
-                  label="Updated"
-                  value={
-                    orderbookState.updatedAt
-                      ? formatRelativeTime(orderbookState.updatedAt)
-                      : "--"
-                  }
-                />
-              </div>
-
-              {visibleLevels.length > 0 ? (
-                <div className="book-table">
-                  <div className="book-header">
-                    <span>Rate</span>
-                    <span>Liquidity</span>
-                    <span>Deposits</span>
-                  </div>
-                  {visibleLevels.map((level) => (
-                    <div
-                      key={`${level.rate}-${level.topDeposit.depositId}`}
-                      className="book-row"
-                    >
-                      <div className="book-cell book-rate">
-                        <strong>{formatRate(level.rate)}</strong>
-                      </div>
-                      <div className="book-cell">
-                        <span>{formatUsd(level.totalLiquidityUsd)}</span>
-                        <div className="book-bar">
-                          <span
-                            style={{
-                              width: `${(level.totalLiquidityUsd / maxLiquidity) * 100}%`,
-                            }}
-                          />
-                        </div>
-                      </div>
-                      <div className="book-cell book-count">
-                        {formatNumber(level.depositCount)}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="empty-state">
-                  <p>
-                    {isOrderbookLoading
-                      ? "Loading orderbook..."
-                      : "No visible levels for this route right now."}
-                  </p>
-                </div>
-              )}
-            </aside>
-          </div>
-        </section>
-
-        {/* ── SDK Strip 2: USDCtoFiat ── */}
+        {/* ── SDK Strip 1: USDCtoFiat ── */}
         <section className="sdk-strip sdk-strip-offramp">
           <div className="strip-left">
             <div className="strip-meta">
@@ -806,6 +650,162 @@ export default function App() {
                 </InlineMessage>
               )}
             </article>
+          </div>
+        </section>
+
+        {/* ── SDK Strip 2: Peerlytics ── */}
+        <section className="sdk-strip sdk-strip-peerlytics">
+          <div className="strip-left">
+            <div className="strip-meta">
+              <span className="sdk-pill badge-peerlytics">@peerlytics/sdk</span>
+              <a
+                href="https://www.npmjs.com/package/@peerlytics/sdk"
+                target="_blank"
+                rel="noreferrer"
+                className="sdk-docs-link"
+              >
+                npm ↗
+              </a>
+            </div>
+
+            <h3 className="strip-name">Peerlytics</h3>
+            <p className="strip-desc">
+              Real-time analytics for the ZKP2P protocol. Query live orderbook
+              data, activity feeds, and maker stats from your server with a single
+              API key.
+            </p>
+
+            <ul className="strip-features">
+              <li>Live orderbook with rate levels and depth</li>
+              <li>Activity feed with typed event filtering</li>
+              <li>Maker portfolio and volume analytics</li>
+            </ul>
+
+            <button
+              type="button"
+              className="install-cmd"
+              onClick={handleCopyPeerlyticsInstall}
+            >
+              <span className="install-prompt">$</span>
+              <span>npm install @peerlytics/sdk</span>
+              <span className="install-copy">
+                {copiedPeerlyticsInstall ? "✓ copied" : "copy"}
+              </span>
+            </button>
+
+            <div className="code-block strip-code">
+              <button
+                type="button"
+                className="code-copy-btn"
+                onClick={handleCopyPeerlyticsCode}
+              >
+                {copiedPeerlyticsCode ? "✓" : "copy"}
+              </button>
+              <pre>{PEERLYTICS_SNIPPET}</pre>
+            </div>
+          </div>
+
+          <div className="strip-demo">
+            <aside className="card">
+              <div className="section-head">
+                <h2>
+                  {routeLabel}
+                  {isOrderbookLoading && <span className="loading-dot" />}
+                </h2>
+                <div className="route-controls">
+                  <select
+                    className="route-select"
+                    value={selectedMarket.platform.id}
+                    onChange={(event) => {
+                      setSelectedPlatformId(event.target.value as AllowedPlatformId);
+                      setIdentifier("");
+                    }}
+                  >
+                    {allowedMarkets.map((entry) => (
+                      <option key={entry.platform.id} value={entry.platform.id}>
+                        {entry.platform.name}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    className="route-select"
+                    value={currency.code}
+                    onChange={(event) => setSelectedCurrencyCode(event.target.value)}
+                  >
+                    {currencyOptions.map((entry) => (
+                      <option key={entry.code} value={entry.code}>
+                        {entry.code}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {orderbookError && (
+                <InlineMessage tone="error">{orderbookError}</InlineMessage>
+              )}
+
+              <div className="book-summary">
+                <ValueTile
+                  label="Best rate"
+                  value={isOrderbookLoading ? "..." : formatRate(orderbookState.orderbook?.bestRate, currency.code)}
+                  accent={!isOrderbookLoading && Boolean(orderbookState.orderbook?.bestRate)}
+                />
+                <ValueTile
+                  label="Liquidity"
+                  value={formatUsd(orderbookState.orderbook?.totalLiquidityUsd)}
+                />
+                <ValueTile
+                  label="Updated"
+                  value={
+                    orderbookState.updatedAt
+                      ? formatRelativeTime(orderbookState.updatedAt)
+                      : "--"
+                  }
+                />
+              </div>
+
+              {visibleLevels.length > 0 ? (
+                <div className="book-table">
+                  <div className="book-header">
+                    <span>Rate</span>
+                    <span>Liquidity</span>
+                    <span>Deposits</span>
+                  </div>
+                  {visibleLevels.map((level) => (
+                    <div
+                      key={`${level.rate}-${level.topDeposit.depositId}`}
+                      className="book-row"
+                    >
+                      <div className="book-cell book-rate">
+                        <strong>{formatRate(level.rate, currency.code)}</strong>
+                      </div>
+                      <div className="book-cell">
+                        <span>{formatUsd(level.totalLiquidityUsd)}</span>
+                        <div className="book-bar">
+                          <span
+                            style={{
+                              width: `${(level.totalLiquidityUsd / maxLiquidity) * 100}%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <div className="book-cell book-count">
+                        {formatNumber(level.depositCount)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="empty-state">
+                  <p>
+                    {isOrderbookLoading
+                      ? "Loading orderbook..."
+                      : "No visible levels for this route right now."}
+                  </p>
+                </div>
+              )}
+            </aside>
           </div>
         </section>
 

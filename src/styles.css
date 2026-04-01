@@ -1019,20 +1019,28 @@ h3 {
   }
 
   .form-grid,
-  .book-summary,
-  .deposit-values,
-  .step-rail {
+  .book-summary {
     grid-template-columns: 1fr;
   }
 
+  .deposit-values {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .step-rail {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  /* Compact 2-column book table: rate + liquidity, hide deposit count */
   .book-header,
   .book-row {
-    grid-template-columns: 1fr;
+    grid-template-columns: 94px 1fr;
     gap: 8px;
   }
 
+  .book-header span:last-child,
   .book-count {
-    text-align: left;
+    display: none;
   }
 
   .button {
@@ -1040,10 +1048,20 @@ h3 {
   }
 
   .wallet-badge {
-    justify-content: space-between;
+    max-width: 100%;
+    flex-wrap: wrap;
+    justify-content: flex-start;
   }
 
   .install-cmd {
     font-size: 11.5px;
+  }
+
+  .topbar {
+    flex-wrap: wrap;
+  }
+
+  .section-head {
+    gap: 12px;
   }
 }
