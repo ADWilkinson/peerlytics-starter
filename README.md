@@ -47,7 +47,15 @@ skills/                      Claude Code skills for AI-assisted development
 cd demo
 npm install
 cp .env.example .env.local
-# set PEERLYTICS_API_KEY=pk_live_...
+```
+
+Grab a free API key at [peerlytics.xyz/developers](https://peerlytics.xyz/developers?tab=account) (1,000 requests/month included), then set it in `.env.local`:
+
+```bash
+PEERLYTICS_API_KEY=pk_live_...
+```
+
+```bash
 npm run dev
 ```
 
@@ -56,7 +64,7 @@ npm run dev
 Each script in `peerlytics/` and `usdctofiat/` runs independently:
 
 ```bash
-# Peerlytics (server-side, needs API key)
+# Peerlytics (server-side, get a free key at peerlytics.xyz/developers)
 export PEERLYTICS_API_KEY=pk_live_...
 npx tsx peerlytics/orderbook-snapshot.ts
 npx tsx peerlytics/live-activity.ts
@@ -78,7 +86,7 @@ const client = new Peerlytics({ apiKey: "pk_live_..." });
 const { orderbooks } = await client.getOrderbook({ currency: "USD", platform: "revolut" });
 ```
 
-Auth options: API key (1,000 free requests/month) or x402 pay-per-request with USDC on Base.
+Auth options: [free API key](https://peerlytics.xyz/developers?tab=account) (1,000 requests/month included) or x402 pay-per-request with USDC on Base.
 
 [npm](https://www.npmjs.com/package/@peerlytics/sdk) | [API docs](https://peerlytics.xyz/developers) | [OpenAPI spec](https://peerlytics.xyz/api/openapi) | [llms.txt](https://peerlytics.xyz/llms.txt)
 
