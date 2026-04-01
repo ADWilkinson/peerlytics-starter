@@ -297,6 +297,10 @@ h3 {
    SDK Pills
 ───────────────────────────────────────── */
 
+.eyebrow {
+  margin-bottom: 8px;
+}
+
 .eyebrow,
 .value-tile span,
 .book-header,

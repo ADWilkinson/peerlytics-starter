@@ -435,7 +435,7 @@ export default function App() {
         {/* ── Topbar ── */}
         <header className="topbar">
           <div className="topbar-brand">
-            <span className="brand-mono">peerlytics-starter</span>
+            <span className="brand-mono">peerlytics & usdctofiat demo</span>
           </div>
           <div className="topbar-actions">
             {walletSession ? (
@@ -461,7 +461,7 @@ export default function App() {
 
         {/* ── Page header ── */}
         <div className="page-header">
-          <h1>Build on ZKP2P.</h1>
+          <h1>Build on Peer.</h1>
           <p className="page-subheading">
             Two production-ready SDKs for P2P FX markets on Base.
             Server-side orderbook analytics and wallet-native delegated off-ramps.
