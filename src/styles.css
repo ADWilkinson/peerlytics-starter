@@ -1,0 +1,560 @@
+:root {
+  color-scheme: light;
+  font-family: "IBM Plex Sans", sans-serif;
+  background: #f4f0e6;
+  color: #121212;
+  --page-bg: #f4f0e6;
+  --surface: rgba(255, 255, 251, 0.82);
+  --surface-strong: rgba(255, 255, 253, 0.96);
+  --surface-muted: rgba(255, 255, 251, 0.62);
+  --border: rgba(18, 18, 18, 0.08);
+  --border-strong: rgba(18, 18, 18, 0.16);
+  --text-soft: rgba(18, 18, 18, 0.64);
+  --text-faint: rgba(18, 18, 18, 0.42);
+  --accent: #1b5e4e;
+  --accent-strong: #124437;
+  --accent-soft: rgba(27, 94, 78, 0.09);
+  --danger: #a23a2e;
+  --success: #185f49;
+  --shadow: 0 18px 40px rgba(35, 30, 18, 0.06);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(193, 168, 126, 0.18), transparent 34%),
+    radial-gradient(circle at top right, rgba(27, 94, 78, 0.06), transparent 30%),
+    var(--page-bg);
+  color: inherit;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+.page {
+  min-height: 100vh;
+  padding: 20px 16px 48px;
+}
+
+.app-shell {
+  width: min(1080px, 100%);
+  margin: 0 auto;
+}
+
+.topbar,
+.section-head,
+.submit-row,
+.deposit-meta,
+.deposit-flags {
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.topbar {
+  margin-bottom: 22px;
+  padding: 4px 0 22px;
+  border-bottom: 1px solid var(--border);
+}
+
+.eyebrow,
+.value-tile span,
+.book-header,
+.status,
+.deposit-meta span {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+h1,
+h2 {
+  font-weight: 600;
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+}
+
+h1 {
+  margin-top: 10px;
+  max-width: 10ch;
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  line-height: 0.94;
+}
+
+h2 {
+  font-size: clamp(1.28rem, 3vw, 1.8rem);
+  line-height: 1.02;
+}
+
+.subtitle {
+  margin-top: 12px;
+  max-width: 30rem;
+  color: var(--text-soft);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.topbar-actions {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+}
+
+.wallet-badge {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-strong);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
+}
+
+.workspace {
+  display: grid;
+  gap: 18px;
+  align-items: start;
+  grid-template-columns: minmax(0, 1.08fr) minmax(330px, 0.92fr);
+}
+
+.card {
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 252, 0.94) 0%,
+    rgba(255, 255, 249, 0.82) 100%
+  );
+  box-shadow:
+    var(--shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(18px);
+}
+
+.form-grid,
+.book-summary,
+.deposit-list,
+.deposit-values {
+  display: grid;
+}
+
+.form-grid {
+  margin-top: 20px;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+}
+
+.field span {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.field input,
+.field select {
+  width: 100%;
+  min-height: 52px;
+  padding: 15px 16px;
+  border: 1px solid rgba(18, 18, 18, 0.09);
+  border-radius: 16px;
+  background: var(--surface-strong);
+  color: inherit;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    background-color 140ms ease;
+}
+
+.field input:focus,
+.field select:focus {
+  outline: none;
+  border-color: rgba(27, 94, 78, 0.22);
+  box-shadow: 0 0 0 4px rgba(27, 94, 78, 0.08);
+}
+
+.field-wide,
+.field-error,
+.submit-row {
+  grid-column: 1 / -1;
+}
+
+.field small {
+  color: var(--text-soft);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.field-error {
+  color: var(--danger);
+  font-size: 13px;
+}
+
+.submit-row {
+  margin-top: 2px;
+  align-items: center;
+}
+
+.route-note {
+  color: var(--text-soft);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.button {
+  display: inline-flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 18px;
+  border: 1px solid transparent;
+  border-radius: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    opacity 140ms ease,
+    transform 140ms ease;
+}
+
+.button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.button-primary {
+  background: var(--accent);
+  color: #f7f6f1;
+  box-shadow: 0 10px 24px rgba(27, 94, 78, 0.16);
+}
+
+.button-primary:hover:not(:disabled) {
+  background: var(--accent-strong);
+}
+
+.button-secondary {
+  background: rgba(255, 255, 255, 0.62);
+  border-color: var(--border);
+  color: inherit;
+}
+
+.inline-message {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface-muted);
+  color: var(--text-soft);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.inline-message.error {
+  border-color: rgba(162, 58, 46, 0.18);
+  color: var(--danger);
+}
+
+.inline-message.success {
+  border-color: rgba(24, 95, 73, 0.18);
+  color: var(--success);
+}
+
+.step-rail {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.step-item {
+  padding: 11px 12px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: rgba(255, 255, 251, 0.58);
+  font-size: 12px;
+  color: var(--text-faint);
+}
+
+.step-item.active {
+  border-color: rgba(27, 94, 78, 0.18);
+  background: linear-gradient(180deg, rgba(27, 94, 78, 0.1), rgba(27, 94, 78, 0.06));
+  color: #111111;
+}
+
+.step-item.complete {
+  color: var(--accent);
+}
+
+.book-summary {
+  gap: 12px;
+  margin-top: 18px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.deposit-values {
+  gap: 12px;
+  margin-top: 16px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.value-tile {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.value-tile strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 1.08rem;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+}
+
+.book-table {
+  margin-top: 18px;
+}
+
+.book-header,
+.book-row {
+  display: grid;
+  gap: 14px;
+  align-items: center;
+  grid-template-columns: 120px minmax(0, 1fr) 72px;
+}
+
+.book-header {
+  margin-bottom: 2px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.book-row {
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(18, 18, 18, 0.06);
+}
+
+.book-row:last-child {
+  border-bottom: 0;
+}
+
+.book-cell {
+  min-width: 0;
+}
+
+.book-rate strong,
+.deposit-meta strong {
+  font-size: 1rem;
+  letter-spacing: -0.03em;
+}
+
+.book-cell span {
+  color: var(--text-soft);
+  font-size: 14px;
+}
+
+.book-bar {
+  margin-top: 8px;
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(18, 18, 18, 0.06);
+}
+
+.book-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(27, 94, 78, 0.52) 0%, var(--accent) 100%);
+}
+
+.book-count {
+  color: var(--text-soft);
+  font-size: 14px;
+  text-align: right;
+}
+
+.deposits-card {
+  margin-top: 18px;
+}
+
+.deposit-list {
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.deposit-row {
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 252, 0.76) 0%,
+    rgba(255, 255, 249, 0.54) 100%
+  );
+}
+
+.deposit-meta {
+  align-items: center;
+}
+
+.deposit-meta > div:first-child {
+  display: grid;
+  gap: 6px;
+}
+
+.deposit-flags {
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 11px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.status-delegated {
+  border-color: rgba(27, 94, 78, 0.18);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.status-manual {
+  color: var(--text-soft);
+}
+
+.empty-state {
+  margin-top: 18px;
+  color: var(--text-soft);
+  font-size: 14px;
+}
+
+.site-foot {
+  padding: 18px 4px 0;
+}
+
+.footer-copy {
+  color: var(--text-soft);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.footer-copy a {
+  color: inherit;
+  text-decoration-color: rgba(18, 18, 18, 0.18);
+  text-underline-offset: 0.22em;
+}
+
+@media (max-width: 900px) {
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .topbar,
+  .section-head,
+  .submit-row,
+  .deposit-meta {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .topbar-actions {
+    align-items: stretch;
+  }
+
+  .step-rail {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .deposit-values {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 12px;
+  }
+
+  .card {
+    padding: 18px;
+    border-radius: 22px;
+  }
+
+  .form-grid,
+  .book-summary,
+  .deposit-values,
+  .step-rail {
+    grid-template-columns: 1fr;
+  }
+
+  .book-header,
+  .book-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .book-count {
+    text-align: left;
+  }
+
+  .button {
+    width: 100%;
+  }
+
+  .wallet-badge {
+    justify-content: space-between;
+  }
+}

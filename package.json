@@ -1,30 +1,27 @@
 {
-  "name": "usdctofiat-peerlytics-starters",
-  "version": "1.0.0",
-  "description": "Example scripts for @usdctofiat/offramp and @peerlytics/sdk",
+  "name": "peerlytics-offramp-showcase",
+  "version": "0.1.0",
+  "description": "Beautifully minimal Vite + React starter for Peerlytics and the USDCtoFiat offramp SDK",
   "private": true,
+  "type": "module",
   "scripts": {
-    "usdctofiat:create": "npx tsx usdctofiat/create-deposit.ts",
-    "usdctofiat:deposits": "npx tsx usdctofiat/manage-deposits.ts",
-    "usdctofiat:close": "npx tsx usdctofiat/close-deposit.ts",
-    "usdctofiat:resume": "npx tsx usdctofiat/resume-deposit.ts",
-    "usdctofiat:platforms": "npx tsx usdctofiat/platform-explorer.ts",
-    "peerlytics:dashboard": "npx tsx peerlytics/volume-dashboard.ts",
-    "peerlytics:rates": "npx tsx peerlytics/rate-monitor.ts",
-    "peerlytics:orderbook": "npx tsx peerlytics/orderbook-snapshot.ts",
-    "peerlytics:maker": "npx tsx peerlytics/maker-report.ts",
-    "peerlytics:activity": "npx tsx peerlytics/live-activity.ts",
-    "peerlytics:x402": "npx tsx peerlytics/x402-agent.ts"
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "deploy:preview": "bash scripts/deploy.sh"
   },
   "dependencies": {
-    "@peerlytics/sdk": "latest",
-    "@usdctofiat/offramp": "^1.0.0",
+    "@peerlytics/sdk": "^0.3.0",
+    "@usdctofiat/offramp": "^1.0.1",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
     "viem": "latest"
   },
   "devDependencies": {
-    "@types/node": "latest",
-    "@types/react": "latest",
-    "tsx": "latest",
-    "typescript": "latest"
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "typescript": "^6.0.2",
+    "vite": "^8.0.3"
   }
 }
