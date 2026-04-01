@@ -503,13 +503,13 @@ export default function App() {
 
             <h3 className="strip-name">USDCtoFiat</h3>
             <p className="strip-desc">
-              Delegated off-ramp for Base. Sell USDC to fiat via Revolut and
-              Venmo with a single React hook — resumable, idempotent, and
-              battle-tested.
+              Delegated off-ramp for Base. Sell USDC to fiat across 10+
+              platforms and 30+ currencies with a single React hook —
+              resumable, idempotent, and battle-tested.
             </p>
 
             <ul className="strip-features">
-              <li>Revolut (GBP, USD, EUR) and Venmo (USD)</li>
+              <li>This demo showcases Revolut and Venmo</li>
               <li>Resumable multi-step deposit flows</li>
               <li>React hook: approve, register, deposit, delegate</li>
             </ul>
