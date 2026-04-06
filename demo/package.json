@@ -11,11 +11,11 @@
     "deploy:preview": "bash scripts/deploy.sh"
   },
   "dependencies": {
-    "@peerlytics/sdk": "^0.3.0",
-    "@usdctofiat/offramp": "^1.0.1",
+    "@peerlytics/sdk": "^0.4.0",
+    "@usdctofiat/offramp": "^1.1.2",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "viem": "latest"
+    "viem": "^2.45.0"
   },
   "devDependencies": {
     "@types/react": "^19.2.14",

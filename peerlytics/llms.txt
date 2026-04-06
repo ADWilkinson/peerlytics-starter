@@ -12,6 +12,34 @@ import { Peerlytics } from "@peerlytics/sdk";
 const client = new Peerlytics({ apiKey: "pk_live_..." }); // required (each key includes 1000 free requests/month)
 ```
 
+## Response shapes (SDK vs raw HTTP)
+
+The SDK methods below return the inner payload directly — you don't see any envelope. If you're calling the HTTP API without the SDK, note:
+
+- Most `/api/v1/*` endpoints wrap the payload in `{ success, data }` — read `response.data`
+- List endpoints return a paginated object inside `data`, not a raw array:
+  - `/deposits` → `{ deposits, count, hasMore, limit, offset, filters }`
+  - `/intents` → `{ intents, count, hasMore, limit, offset, filters }`
+  - `/activity` → `{ events, count, hasMore, limit, offset, filters }` (iterate over `events`, not the top level)
+  - `/market/summary` → `{ markets, count, hasMore, ... }`
+- Exceptions with no envelope: `/analytics/summary|overview|leaderboard` and `/account/*`
+
+## Required filters (SDK ≥ 0.4.0 throws `ValidationError` client-side)
+
+- `client.getDeposits(filters)` — at least one of `depositor`, `delegate`, `platform`, `currency`
+- `client.getIntents(filters)` — at least one of `owner`, `recipient`, `verifier`, `depositId`, `status`
+
+The SDK fails fast before hitting the network; the raw API returns a 400 `missing_filter` with the same guidance.
+
+## Currency hashes vs codes
+
+On-chain, currencies are stored as `bytes32`. Fields to know on deposit responses:
+
+- `DepositMarket.currency` and each `deposit.currencies[].currency` — resolved ISO code (e.g. `"GBP"`)
+- `DepositMarket.currencyCode` and each `deposit.currencies[].currencyCode` — raw bytes32 hash (e.g. `0xc4ae21...`)
+
+If you need your own mapping, `client.getCurrencies()` returns every supported currency with its `code`, `label`, `flag`, and all matching hashes.
+
 ## Methods
 
 Analytics:
@@ -25,9 +53,9 @@ Market:
 
 Explorer:
 - client.getDeposit(id, { limit?, offset? }) - deposit detail with intents
-- client.getDeposits({ depositor?, delegate?, platform?, currency?, status?, accepting?, limit?, offset? }) - query deposits
+- client.getDeposits({ depositor?, delegate?, platform?, currency?, status?, accepting?, limit?, offset? }) - query deposits — **at least one of depositor/delegate/platform/currency is required**; returns `{ deposits, count, hasMore, ... }`
 - client.getIntent(hash) - intent detail
-- client.getIntents({ owner?, recipient?, verifier?, depositId?, status?, limit?, offset? }) - query intents
+- client.getIntents({ owner?, recipient?, verifier?, depositId?, status?, limit?, offset? }) - query intents — **at least one of owner/recipient/verifier/depositId/status is required**; returns `{ intents, count, hasMore, ... }`
 - client.getAddress(address, { limit?, offset? }) - address profile with stats
 - client.getMaker(address) - maker portfolio with allocations and profit
 - client.getVerifier(address, { limit?, offset? }) - verifier stats and breakdown
@@ -35,7 +63,7 @@ Explorer:
 - client.search(query, { type?, role?, limit?, offset? }) - multi-type search
 
 Activity:
-- client.getActivity({ type?, depositId?, address?, rateManagerId?, since?, limit?, offset? }) - live protocol events
+- client.getActivity({ type?, depositId?, address?, rateManagerId?, since?, limit?, offset? }) - live protocol events — returns `{ events, count, hasMore, ... }`, iterate over `result.events` (not a raw array)
 - client.streamActivity({ type?, rateManagerId?, since?, intervalMs?, limit? }, { signal? }) - SSE real-time event stream (returns ReadableStream<LiveEvent>)
 
 History:

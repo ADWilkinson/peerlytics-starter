@@ -88,6 +88,12 @@ const { orderbooks } = await client.getOrderbook({ currency: "USD", platform: "r
 
 Auth options: [free API key](https://peerlytics.xyz/developers?tab=account) (1,000 requests/month included) or x402 pay-per-request with USDC on Base.
 
+**A few gotchas worth knowing upfront** (SDK ≥ 0.4.0):
+
+- List methods (`getActivity`, `getDeposits`, `getIntents`, `getMarketSummary`) return paginated envelopes like `{ events, count, hasMore, ... }` — iterate over `.events` / `.deposits` / etc, not the top-level result.
+- `getDeposits()` needs at least one of `depositor`, `delegate`, `platform`, `currency`; `getIntents()` needs at least one of `owner`, `recipient`, `verifier`, `depositId`, `status`. Both throw `ValidationError` client-side if called empty.
+- `DepositMarket.currency` / `deposit.currencies[].currency` are resolved ISO codes (e.g. `"GBP"`). `currencyCode` is the raw bytes32 hash — use `currency` for display.
+
 [npm](https://www.npmjs.com/package/@peerlytics/sdk) | [API docs](https://peerlytics.xyz/developers) | [OpenAPI spec](https://peerlytics.xyz/api/openapi) | [llms.txt](https://peerlytics.xyz/llms.txt)
 
 ### @usdctofiat/offramp
