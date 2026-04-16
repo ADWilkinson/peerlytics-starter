@@ -137,7 +137,7 @@ The orderbook API key stays server-side and is never exposed to the browser.
 
 - [Peerlytics Explorer](https://peerlytics.xyz/explorer)
 - [ZKP2P Protocol](https://zkp2p.xyz)
-- [@davyjones0x](https://x.com/davyjones0x)
+- [@andrewwilkinson](https://x.com/andrewwilkinson)
 
 ## License
 

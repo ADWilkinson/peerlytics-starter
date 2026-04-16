@@ -954,8 +954,8 @@ export default function App() {
               starter repo
             </a>
             . More from{" "}
-            <a href="https://x.com/davyjones0x" target="_blank" rel="noreferrer">
-              @davyjones0x
+            <a href="https://x.com/andrewwilkinson" target="_blank" rel="noreferrer">
+              @andrewwilkinson
             </a>
             .
           </p>
