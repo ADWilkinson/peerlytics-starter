@@ -1,6 +1,6 @@
-# @usdctofiat/offramp v1.1
+# @usdctofiat/offramp v1.3
 
-USDC-to-fiat offramp SDK for Base. 6 functions + 2 const objects.
+USDC-to-fiat offramp SDK for Base. 6 functions + 2 const objects. Also ships outbound HMAC-signed webhooks for `deposit.*` and `otc.*` events (see Webhooks section below).
 
 ## Install
 
@@ -161,6 +161,19 @@ All deposits are delegated, market-tracking, auto-closing, on Base (8453).
 ## OTC private orders
 
 Pass `otcTaker` to `offramp()` to whitelist a single taker wallet at creation time, or use `enableOtc` / `disableOtc` to toggle restriction on an existing deposit. Hand the returned `otcLink` (or `getOtcLink(depositId)`) to the taker — it deep-links into usdctofiat.xyz to the restricted deposit.
+
+## Webhooks
+
+Register outbound HMAC-SHA256 signed webhooks at https://usdctofiat.xyz/developers. Auth uses the same Peerlytics API key (same `paid-api-keys` collection, same `api-credits` pool). Registration is a Pro-plan feature — free-tier keys get `402 webhooks_require_pro`.
+
+Events: `deposit.created`, `deposit.filled`, `deposit.partially_filled`, `deposit.closed`, `otc.enabled`, `otc.disabled`, `otc.taken`.
+
+Delivery headers:
+  X-Usdctofiat-Signature   t=<unix>,v1=<hex>
+  X-Usdctofiat-Event       one of the events above
+  X-Usdctofiat-Delivery-Id uuid
+
+Verification: recompute HMAC-SHA256 over `${timestamp}.${rawBody}` with your stored secret, `timingSafeEqual` against the `v1=` hex. Reject timestamps older than 5 minutes to defend against replay. Reference receiver: `usdctofiat/webhook-receiver.ts` (~150 LOC, `node:crypto` only).
 
 ## Links
 

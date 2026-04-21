@@ -24,7 +24,7 @@ The SDK methods below return the inner payload directly — you don't see any en
   - `/market/summary` → `{ markets, count, hasMore, ... }`
 - Exceptions with no envelope: `/analytics/summary|overview|leaderboard` and `/account/*`
 
-## Required filters (SDK ≥ 0.4.0 throws `ValidationError` client-side)
+## Required filters (throws `ValidationError` client-side)
 
 - `client.getDeposits(filters)` — at least one of `depositor`, `delegate`, `platform`, `currency`
 - `client.getIntents(filters)` — at least one of `owner`, `recipient`, `verifier`, `depositId`, `status`
@@ -58,9 +58,18 @@ Explorer:
 - client.getIntents({ owner?, recipient?, verifier?, depositId?, status?, limit?, offset? }) - query intents — **at least one of owner/recipient/verifier/depositId/status is required**; returns `{ intents, count, hasMore, ... }`
 - client.getAddress(address, { limit?, offset? }) - address profile with stats
 - client.getMaker(address) - maker portfolio with allocations and profit
+- client.getTaker(address) - taker portfolio: fills, tier, lock score, currency/platform mix
+- client.getIntegrator(code, { windowDays? }) - ERC-8021 integrator rollup: volume, unique makers, top markets, recent deposits
+- client.getPlatform(platform, { windowDays? }) - platform rollup: currencies, makers, takers, recent intents
+- client.getDelegate(address) - delegate rollup: rate managers, delegated deposits, PnL
 - client.getVerifier(address, { limit?, offset? }) - verifier stats and breakdown
 - client.getVault(id, { days? }) - vault detail with snapshots
 - client.search(query, { type?, role?, limit?, offset? }) - multi-type search
+
+Each explorer entity above also has a canonical page at peerlytics.xyz/explorer/<entity>/<slug> — the SDK method and the page are siblings.
+
+Time-series (Pro, 20 credits/call):
+- client.getTimeseries({ entity: "volume" | "deposits" | "intents", granularity?: "hour" | "day", from?, to? }) - bucketed rollups. Hour-granularity is capped at 2000 buckets/call.
 
 Activity:
 - client.getActivity({ type?, depositId?, address?, rateManagerId?, since?, limit?, offset? }) - live protocol events — returns `{ events, count, hasMore, ... }`, iterate over `result.events` (not a raw array)
@@ -105,7 +114,10 @@ Types: ActivityStreamFilters, ActivityStreamEvent (for streamActivity)
 - rate-monitor.ts: poll rates, alert on threshold
 - orderbook-snapshot.ts: multi-currency orderbook depth
 - maker-report.ts: portfolio report for a maker address
+- integrator-report.ts: ERC-8021 integrator stats (deposits, volume, top markets)
+- timeseries-chart.ts: hourly/daily rollups in a terminal sparkbar chart
 - live-activity.ts: real-time protocol event stream
+- webhook-receiver.ts: HMAC-verified HTTPS receiver for outbound webhooks
 - x402-agent.ts: x402 pay-per-request flow walkthrough
 
 ## Links

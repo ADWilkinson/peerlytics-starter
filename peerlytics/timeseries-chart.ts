@@ -7,7 +7,7 @@
  * Pro tier: 20 credits per call. Grab a key at
  * https://peerlytics.xyz/developers → Account.
  *
- * Endpoint: GET /api/v1/analytics/timeseries
+ * Uses `client.getTimeseries(...)` from @peerlytics/sdk.
  *
  * Usage:
  *   ENTITY=volume GRANULARITY=day PEERLYTICS_API_KEY=pk_…  \
@@ -20,6 +20,8 @@
  *   TO                  ISO-8601 or unix seconds (default now)
  *   PEERLYTICS_BASE_URL Default https://peerlytics.xyz
  */
+
+import { Peerlytics, PeerlyticsError } from "@peerlytics/sdk";
 
 const apiKey = process.env.PEERLYTICS_API_KEY;
 if (!apiKey) {
@@ -34,8 +36,8 @@ type Granularity = "hour" | "day";
 
 const entity = (process.env.ENTITY ?? "volume") as Entity;
 const granularity = (process.env.GRANULARITY ?? "day") as Granularity;
-const from = process.env.FROM;
-const to = process.env.TO;
+const fromRaw = process.env.FROM;
+const toRaw = process.env.TO;
 const baseUrl = process.env.PEERLYTICS_BASE_URL ?? "https://peerlytics.xyz";
 
 const fmt = {
@@ -60,50 +62,30 @@ function sparkbar(value: number, max: number, width = 36): string {
   return "█".repeat(Math.min(width, scaled)) + " ".repeat(Math.max(0, width - scaled));
 }
 
-interface TimeseriesBucket {
-  bucket: string;
-  value: number;
-}
-
-interface TimeseriesPayload {
-  success: boolean;
-  data?: {
-    entity: string;
-    granularity: string;
-    from: string;
-    to: string;
-    buckets: TimeseriesBucket[];
-    cached: boolean;
-  };
-  error?: string;
+/** Accept either ISO-8601 or unix seconds; leave undefined to let the API default. */
+function parseBoundary(value: string | undefined): string | number | undefined {
+  if (!value) return undefined;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : value;
 }
 
 async function main(): Promise<void> {
-  const qs = new URLSearchParams({ entity, granularity });
-  if (from) qs.set("from", from);
-  if (to) qs.set("to", to);
+  const client = new Peerlytics({ apiKey, baseUrl });
 
-  const url = `${baseUrl}/api/v1/analytics/timeseries?${qs.toString()}`;
-  const response = await fetch(url, {
-    headers: { Accept: "application/json", "x-api-key": apiKey! },
+  const data = await client.getTimeseries({
+    entity,
+    granularity,
+    from: parseBoundary(fromRaw),
+    to: parseBoundary(toRaw),
   });
-  const payload = (await response.json().catch(() => null)) as TimeseriesPayload | null;
-  if (!response.ok || !payload?.success || !payload.data) {
-    console.error(
-      "Request failed:",
-      payload?.error ?? `${response.status} ${response.statusText}`,
-    );
-    process.exit(1);
-  }
 
-  const data = payload.data;
   if (!data.buckets.length) {
     console.log("No buckets in this window.");
     return;
   }
 
-  const max = data.buckets.reduce((acc: number, b: TimeseriesBucket) => Math.max(acc, b.value), 0);
-  const total = data.buckets.reduce((acc: number, b: TimeseriesBucket) => acc + b.value, 0);
+  const max = data.buckets.reduce((acc, b) => Math.max(acc, b.value), 0);
+  const total = data.buckets.reduce((acc, b) => acc + b.value, 0);
 
   console.log();
   console.log(fmt.bold(`  ${entity.toUpperCase()} · ${granularity}ly`));
@@ -127,6 +109,13 @@ async function main(): Promise<void> {
 }
 
 main().catch((err) => {
+  if (err instanceof PeerlyticsError) {
+    console.error(`Peerlytics ${err.status} ${err.code}: ${err.message}`);
+    if (err.code === "insufficient_credits") {
+      console.error(fmt.dim("  Top up credits at https://peerlytics.xyz/developers?tab=account"));
+    }
+    process.exit(1);
+  }
   console.error("Request failed:", err instanceof Error ? err.message : err);
   process.exit(1);
 });

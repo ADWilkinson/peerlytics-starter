@@ -5,10 +5,7 @@
  * unique makers, top markets, recent deposits. Attribution is resolved from
  * onchain calldata, so any deposit your SDK tags with your code will appear.
  *
- * Calls the raw HTTP endpoint so it works today without pinning to a specific
- * SDK version. Once @peerlytics/sdk exposes getIntegrator(), swap to it.
- *
- * Endpoint: GET /api/v1/explorer/integrator/{code}
+ * Uses `client.getIntegrator(code, { windowDays })` from @peerlytics/sdk.
  *
  * Usage:
  *   CODE=usdctofiat npx tsx peerlytics/integrator-report.ts
@@ -19,6 +16,8 @@
  *                        Omit for anonymous (rate-limited, free).
  *   PEERLYTICS_BASE_URL Default https://peerlytics.xyz
  */
+
+import { Peerlytics, NotFoundError, PeerlyticsError } from "@peerlytics/sdk";
 
 const code = process.env.CODE;
 if (!code) {
@@ -44,56 +43,11 @@ function usdc(n: number): string {
   return `$${n.toFixed(2)}`;
 }
 
-interface IntegratorPayload {
-  success: boolean;
-  data?: {
-    integrator: { code: string; label: string; url: string | null; market: string };
-    summary: {
-      deposits: number;
-      uniqueMakers: number;
-      uniqueTakers: number;
-      fulfilledIntents: number;
-      signaledIntents: number;
-      prunedIntents: number;
-      volumeUsd: number;
-      liquidityUsd: number;
-      windowDays: number;
-      resolvedDeposits: number;
-      resolvedIntents: number;
-    };
-    topMakers: Array<{ address: string; deposits: number; volumeUsd: number }>;
-    topMarkets: Array<{
-      platformLabel: string;
-      currencyLabel: string;
-      volumeUsd: number;
-      fulfilledIntents: number;
-    }>;
-    recentDeposits: Array<{
-      depositId: string;
-      maker: string;
-      volumeUsd: number;
-      createdAt: string | null;
-    }>;
-  };
-  error?: string;
-}
-
 async function main(): Promise<void> {
-  const url = `${baseUrl}/api/v1/explorer/integrator/${encodeURIComponent(code!)}?windowDays=${windowDays}`;
-  const headers: Record<string, string> = { Accept: "application/json" };
-  if (apiKey) headers["x-api-key"] = apiKey;
+  const client = new Peerlytics({ apiKey, baseUrl });
 
-  const response = await fetch(url, { headers });
-  const payload = (await response.json().catch(() => null)) as IntegratorPayload | null;
-  if (!response.ok || !payload?.success || !payload.data) {
-    console.error(
-      "Request failed:",
-      payload?.error ?? `${response.status} ${response.statusText}`,
-    );
-    process.exit(1);
-  }
-
-  const { integrator, summary } = payload.data;
+  const data = await client.getIntegrator(code!, { windowDays });
+  const { integrator, summary } = data;
 
   console.log();
   console.log(fmt.bold(`  ${integrator.label}`));
@@ -115,9 +69,9 @@ async function main(): Promise<void> {
   );
   console.log();
 
-  if (payload.data.topMakers.length) {
+  if (data.topMakers.length) {
     console.log(fmt.bold("  Top makers"));
-    for (const maker of payload.data.topMakers.slice(0, 5)) {
+    for (const maker of data.topMakers.slice(0, 5)) {
       const short = `${maker.address.slice(0, 6)}…${maker.address.slice(-4)}`;
       console.log(
         `  ${fmt.cyan(short)}  ${usdc(maker.volumeUsd).padStart(10)}  ${maker.deposits} deposits`,
@@ -126,9 +80,9 @@ async function main(): Promise<void> {
     console.log();
   }
 
-  if (payload.data.topMarkets.length) {
+  if (data.topMarkets.length) {
     console.log(fmt.bold("  Top markets"));
-    for (const market of payload.data.topMarkets.slice(0, 5)) {
+    for (const market of data.topMarkets.slice(0, 5)) {
       console.log(
         `  ${market.platformLabel.padEnd(12)} ${market.currencyLabel.padEnd(6)} ${usdc(market.volumeUsd).padStart(10)}  ${market.fulfilledIntents} fills`,
       );
@@ -136,9 +90,9 @@ async function main(): Promise<void> {
     console.log();
   }
 
-  if (payload.data.recentDeposits.length) {
+  if (data.recentDeposits.length) {
     console.log(fmt.bold("  Recent deposits"));
-    for (const dep of payload.data.recentDeposits.slice(0, 5)) {
+    for (const dep of data.recentDeposits.slice(0, 5)) {
       const short = `${dep.maker.slice(0, 6)}…${dep.maker.slice(-4)}`;
       console.log(
         `  #${dep.depositId.padEnd(6)} ${short}  ${usdc(dep.volumeUsd).padStart(10)}  ${fmt.dim(dep.createdAt?.slice(0, 10) ?? "?")}`,
@@ -152,6 +106,15 @@ async function main(): Promise<void> {
 }
 
 main().catch((err) => {
+  if (err instanceof NotFoundError) {
+    console.error(`Unknown integrator code: ${code}`);
+    console.error(fmt.dim(`  See ${baseUrl}/explorer/integrator for the registered list.`));
+    process.exit(1);
+  }
+  if (err instanceof PeerlyticsError) {
+    console.error(`Peerlytics ${err.status} ${err.code}: ${err.message}`);
+    process.exit(1);
+  }
   console.error("Request failed:", err instanceof Error ? err.message : err);
   process.exit(1);
 });
