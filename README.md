@@ -20,7 +20,10 @@ peerlytics/                  @peerlytics/sdk examples (run standalone with ts-no
   rate-monitor.ts              poll rates, alert on threshold
   volume-dashboard.ts          protocol stats terminal dashboard
   maker-report.ts              portfolio report for a maker address
+  integrator-report.ts         ERC-8021 integrator stats (deposits, volume, top markets)
+  timeseries-chart.ts          hourly/daily rollups in a terminal sparkbar chart
   live-activity.ts             real-time protocol event stream (SSE)
+  webhook-receiver.ts          HMAC-verified HTTPS receiver for outbound webhooks
   x402-agent.ts                x402 pay-per-request flow (no API key needed)
   llms.txt                     LLM-friendly SDK reference
 
@@ -32,6 +35,7 @@ usdctofiat/                  @usdctofiat/offramp examples
   manage-deposits.ts           list and inspect deposits for a wallet
   platform-explorer.ts         enumerate platforms, currencies, and validation
   react-example.tsx            useOfframp hook usage in React
+  webhook-receiver.ts          HMAC-verified HTTPS receiver for deposit/otc events
   llms.txt                     LLM-friendly SDK reference
 
 skills/                      Claude Code skills for AI-assisted development
@@ -117,7 +121,21 @@ Need a private order? Pass `otcTaker` to restrict the deposit to a single wallet
 
 Supported platforms: Revolut, Venmo, CashApp, Chime, Wise, Mercado Pago, Zelle, PayPal, Monzo, N26.
 
-[npm](https://www.npmjs.com/package/@usdctofiat/offramp) | [usdctofiat.xyz](https://usdctofiat.xyz)
+[npm](https://www.npmjs.com/package/@usdctofiat/offramp) | [usdctofiat.xyz](https://usdctofiat.xyz) | [Register webhooks](https://usdctofiat.xyz/developers)
+
+## Webhooks
+
+Both products deliver HMAC-SHA256 signed outbound webhooks. Register endpoints from the respective developer dashboard and store the secret returned on register — it is only shown once.
+
+```bash
+# USDCtoFiat: deposit + otc events
+WEBHOOK_SECRET=whsec_... npx tsx usdctofiat/webhook-receiver.ts
+
+# Peerlytics: deposit / intent / rate events
+WEBHOOK_SECRET=whsec_... npx tsx peerlytics/webhook-receiver.ts
+```
+
+The verification pattern is the same across both: `t=<unix>,v1=<hex>` signature header, HMAC-SHA256 over `${timestamp}.${rawBody}`, 5-minute replay window. Copy the reference implementation straight into your server — it's ~150 LOC with no dependencies beyond `node:crypto`.
 
 ## Deploy the demo
 
