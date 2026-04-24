@@ -76,8 +76,8 @@ const { orderbooks } = await client.getOrderbook({
   platform: "revolut",
 });`;
 
-const USDCTOFIAT_SNIPPET = `import { useOfframp, PLATFORMS, CURRENCIES }
-  from "@usdctofiat/offramp/react";
+const USDCTOFIAT_SNIPPET = `import { useOfframp } from "@usdctofiat/offramp/react";
+import { PLATFORMS, CURRENCIES } from "@usdctofiat/offramp";
 
 const { offramp } = useOfframp();
 

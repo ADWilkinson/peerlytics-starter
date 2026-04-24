@@ -106,7 +106,8 @@ Auth options: [free API key](https://peerlytics.xyz/developers?tab=account) (1,0
 Delegated USDC-to-fiat off-ramp on Base. Revolut, Venmo, Wise, PayPal, and more.
 
 ```ts
-import { useOfframp, PLATFORMS, CURRENCIES } from "@usdctofiat/offramp/react";
+import { useOfframp } from "@usdctofiat/offramp/react";
+import { PLATFORMS, CURRENCIES } from "@usdctofiat/offramp";
 
 const { offramp, deposits, close } = useOfframp();
 await offramp(walletClient, {
