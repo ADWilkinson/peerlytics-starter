@@ -216,11 +216,11 @@ See `usdctofiat/paypal-react-example.tsx` and `usdctofiat/paypal-deposit.ts`.
 
 offramp() is resumable. Before creating a new deposit, it checks for an existing undelegated deposit. If found, skips to delegation.
 
-Full flow (5 steps, 3 wallet signatures — 4 when otcTaker is supplied):
+Full flow (3 wallet signatures — 4 when otcTaker is supplied):
 1. Approve USDC allowance (wallet tx)
 2. Register payee details (`POST /v2/makers/create` — flat `{ offchainId, telegramUsername? }` payload)
 3. Create deposit on-chain (wallet tx)
-4. Confirm deposit ID (automatic)
+4. Confirm deposit ID (automatic, no signature)
 5. Delegate to vault (wallet tx)
 6. Restrict to OTC taker (wallet tx, only when `otcTaker` is set)
 

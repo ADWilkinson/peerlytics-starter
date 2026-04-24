@@ -88,7 +88,6 @@ export function PayPalSellForm() {
 
       {needsExtension && peer.info && (
         <div
-          role="status"
           style={{
             border: "1px solid #ddd",
             background: "#fafafa",

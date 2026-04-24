@@ -97,17 +97,22 @@ async function main() {
     console.log(`  Tx hash:    ${fmt.dim(result.txHash)}`);
     console.log();
   } catch (err) {
-    const error = err as OfframpError;
+    if (!(err instanceof OfframpError)) {
+      console.log();
+      console.log(fmt.red(`  ✗ ${err instanceof Error ? err.message : String(err)}`));
+      console.log();
+      process.exit(1);
+    }
 
     // New in v2: curator rejects PayPal and Wise makers until the user has
     // registered their handle inside the Peer (PeerAuth) browser extension.
     // A Node CLI can't drive that handshake; print a clear recovery path.
-    if (error.code === OFFRAMP_ERROR_CODES.EXTENSION_REGISTRATION_REQUIRED) {
+    if (err.code === OFFRAMP_ERROR_CODES.EXTENSION_REGISTRATION_REQUIRED) {
       const info = getPeerExtensionRegistrationInfo("paypal");
       console.log();
       console.log(fmt.yellow("  ⚠ Peer extension registration required"));
       console.log();
-      console.log(`  ${info?.requiredPrompt ?? error.message}`);
+      console.log(`  ${info?.requiredPrompt ?? err.message}`);
       console.log();
       console.log(fmt.dim("  How to recover:"));
       console.log(fmt.dim("    1. Install the Peer (PeerAuth) browser extension"));
@@ -125,9 +130,9 @@ async function main() {
     }
 
     console.log();
-    console.log(fmt.red(`  ✗ ${error.message}`));
-    if (error.code) console.log(fmt.dim(`    Code: ${error.code}`));
-    if (error.step) console.log(fmt.dim(`    Step: ${error.step}`));
+    console.log(fmt.red(`  ✗ ${err.message}`));
+    console.log(fmt.dim(`    Code: ${err.code}`));
+    if (err.step) console.log(fmt.dim(`    Step: ${err.step}`));
     console.log();
     process.exit(1);
   }
