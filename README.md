@@ -7,6 +7,10 @@ Production-ready examples and a live demo for two SDKs that cover the ZKP2P prot
 
 **Live demo:** [offramp-sdk.vercel.app](https://offramp-sdk.vercel.app)
 
+**Developer portals:** [usdctofiat.xyz/developers](https://usdctofiat.xyz/developers) · [peerlytics.xyz/developers](https://peerlytics.xyz/developers)
+
+**Agent skills (Claude Code, Cursor):** [`integrate-usdctofiat-offramp`](skills/claude/integrate-usdctofiat-offramp/SKILL.md) · [`query-peerlytics-data`](skills/claude/query-peerlytics-data/SKILL.md). Or hand the canonical `llms-full.txt` files to any assistant: [usdctofiat.xyz/llms-full.txt](https://usdctofiat.xyz/llms-full.txt) · [peerlytics.xyz/llms-full.txt](https://peerlytics.xyz/llms-full.txt).
+
 ## What's in this repo
 
 ```text
