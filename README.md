@@ -1,13 +1,33 @@
 # Peerlytics & USDCtoFiat Starters
 
-Production-ready examples and a live demo for two SDKs that cover the ZKP2P protocol on Base: server-side analytics with **@peerlytics/sdk** and wallet-native USDC off-ramps with **@usdctofiat/offramp**.
+Production-ready examples and a live demo for the two SDKs that cover the ZKP2P protocol on Base: server-side analytics with **@peerlytics/sdk** and wallet-native USDC off-ramps with **@usdctofiat/offramp**.
 
 [![npm: @peerlytics/sdk](https://img.shields.io/npm/v/@peerlytics/sdk?label=%40peerlytics%2Fsdk&color=1b5e4e)](https://www.npmjs.com/package/@peerlytics/sdk)
 [![npm: @usdctofiat/offramp](https://img.shields.io/npm/v/@usdctofiat/offramp?label=%40usdctofiat%2Fofframp&color=6e4a0e)](https://www.npmjs.com/package/@usdctofiat/offramp)
 
 **Live demo:** [offramp-sdk.vercel.app](https://offramp-sdk.vercel.app)
-
 **Developer portals:** [usdctofiat.xyz/developers](https://usdctofiat.xyz/developers) · [peerlytics.xyz/developers](https://peerlytics.xyz/developers)
+
+## 60-second deposit
+
+```ts
+import { offramp, PLATFORMS, CURRENCIES } from "@usdctofiat/offramp";
+
+const { depositId, txHash } = await offramp(walletClient, {
+  amount: "100",
+  platform: PLATFORMS.REVOLUT,
+  currency: CURRENCIES.EUR,
+  identifier: "alice",
+});
+```
+
+That single call approves USDC, creates the escrow deposit on Base, and delegates pricing to the managed vault. Your users settle on Revolut, Venmo, Wise, CashApp, Zelle, Monzo, or PayPal without leaving your app.
+
+Need a fresh app skeleton instead of dropping into an existing one?
+
+```bash
+npx create-offramp-app@latest my-offramp --template=next         # next | vite | telegram-bot
+```
 
 **Agent skills (Claude Code, Cursor):** [`integrate-usdctofiat-offramp`](skills/claude/integrate-usdctofiat-offramp/SKILL.md) · [`query-peerlytics-data`](skills/claude/query-peerlytics-data/SKILL.md). Or hand the canonical `llms-full.txt` files to any assistant: [usdctofiat.xyz/llms-full.txt](https://usdctofiat.xyz/llms-full.txt) · [peerlytics.xyz/llms-full.txt](https://peerlytics.xyz/llms-full.txt).
 
@@ -19,7 +39,7 @@ demo/                        Vite + React demo app (deployed to Vercel)
   api/orderbook.ts             Vercel serverless orderbook proxy
   server/peerlytics.ts         shared Peerlytics server helper (dev + prod)
 
-peerlytics/                  @peerlytics/sdk examples (run standalone with ts-node/bun)
+peerlytics/                  @peerlytics/sdk examples (run standalone with tsx/bun)
   orderbook-snapshot.ts        multi-currency orderbook depth
   rate-monitor.ts              poll rates, alert on threshold
   volume-dashboard.ts          protocol stats terminal dashboard
@@ -44,43 +64,46 @@ usdctofiat/                  @usdctofiat/offramp examples
 
 skills/                      Claude Code skills for AI-assisted development
   claude/
-    query-peerlytics-data/     skill: query protocol data via Peerlytics SDK
+    query-peerlytics-data/         skill: query protocol data via Peerlytics SDK
     integrate-usdctofiat-offramp/  skill: integrate the offramp SDK
 ```
 
-## Quick start
+## Run the examples
 
-### Demo app
-
-```bash
-cd demo
-npm install
-cp .env.example .env.local
-```
-
-Grab a free API key at [peerlytics.xyz/developers](https://peerlytics.xyz/developers?tab=account) (1,000 requests/month included), then set it in `.env.local`:
+Each script under `peerlytics/` and `usdctofiat/` runs standalone:
 
 ```bash
-PEERLYTICS_API_KEY=pk_live_...
-```
-
-```bash
-npm run dev
-```
-
-### Standalone examples
-
-Each script in `peerlytics/` and `usdctofiat/` runs independently:
-
-```bash
-# Peerlytics (server-side, get a free key at peerlytics.xyz/developers)
+# Peerlytics (server-side, free key includes 1,000 requests/month)
 export PEERLYTICS_API_KEY=pk_live_...
 npx tsx peerlytics/orderbook-snapshot.ts
 npx tsx peerlytics/live-activity.ts
 
-# USDCtoFiat (wallet-side, needs private key for tx examples)
+# USDCtoFiat (wallet-side, needs a private key for tx examples)
 npx tsx usdctofiat/platform-explorer.ts
 ```
+
+Get a free API key at [peerlytics.xyz/developers](https://peerlytics.xyz/developers?tab=account) — same key authenticates the Peerlytics paid API _and_ outbound webhooks for both products.
+
+## Run the demo locally
+
+```bash
+cd demo
+npm install
+cp .env.example .env.local         # set PEERLYTICS_API_KEY
+npm run dev
+```
+
+Deploy to Vercel:
+
+```bash
+cd demo
+vercel link                                # link to your Vercel project
+vercel env add PEERLYTICS_API_KEY production
+vercel env add PEERLYTICS_API_KEY preview
+vercel --prod
+```
+
+The orderbook API key stays server-side and is never exposed to the browser.
 
 ## SDKs at a glance
 
@@ -95,15 +118,15 @@ const client = new Peerlytics({ apiKey: "pk_live_..." });
 const { orderbooks } = await client.getOrderbook({ currency: "USD", platform: "revolut" });
 ```
 
-Auth options: [free API key](https://peerlytics.xyz/developers?tab=account) (1,000 requests/month included) or x402 pay-per-request with USDC on Base.
+Auth options: [free API key](https://peerlytics.xyz/developers?tab=account) (1,000 requests/month) or x402 pay-per-request with USDC on Base.
 
-**A few gotchas worth knowing upfront** (SDK ≥ 0.4.0):
+**Gotchas worth knowing upfront** (SDK ≥ 0.4.0):
 
 - List methods (`getActivity`, `getDeposits`, `getIntents`, `getMarketSummary`) return paginated envelopes like `{ events, count, hasMore, ... }` — iterate over `.events` / `.deposits` / etc, not the top-level result.
-- `getDeposits()` needs at least one of `depositor`, `delegate`, `platform`, `currency`; `getIntents()` needs at least one of `owner`, `recipient`, `verifier`, `depositId`, `status`. Both throw `ValidationError` client-side if called empty.
+- `getDeposits()` requires at least one of `depositor`, `delegate`, `platform`, `currency`; `getIntents()` requires at least one of `owner`, `recipient`, `verifier`, `depositId`, `status`. Both throw `ValidationError` client-side if called empty.
 - `DepositMarket.currency` / `deposit.currencies[].currency` are resolved ISO codes (e.g. `"GBP"`). `currencyCode` is the raw bytes32 hash — use `currency` for display.
 
-[npm](https://www.npmjs.com/package/@peerlytics/sdk) | [API docs](https://peerlytics.xyz/developers) | [OpenAPI spec](https://peerlytics.xyz/api/openapi) | [llms.txt](https://peerlytics.xyz/llms.txt)
+[npm](https://www.npmjs.com/package/@peerlytics/sdk) · [Developer portal](https://peerlytics.xyz/developers) · [OpenAPI spec](https://peerlytics.xyz/api/openapi) · [llms.txt](https://peerlytics.xyz/llms.txt)
 
 ### @usdctofiat/offramp
 
@@ -128,11 +151,11 @@ Need a private order? Pass `otcTaker` to restrict the deposit to a single wallet
 
 Supported platforms: Revolut, Venmo, CashApp, Chime, Wise, Mercado Pago, Zelle, PayPal, Monzo, N26.
 
-[npm](https://www.npmjs.com/package/@usdctofiat/offramp) | [usdctofiat.xyz](https://usdctofiat.xyz) | [Register webhooks](https://usdctofiat.xyz/developers)
+[npm](https://www.npmjs.com/package/@usdctofiat/offramp) · [Developer portal](https://usdctofiat.xyz/developers) · [API reference](https://usdctofiat.xyz/developers/api)
 
 ## Webhooks
 
-Both products deliver HMAC-SHA256 signed outbound webhooks. Register endpoints from the respective developer dashboard and store the secret returned on register — it is only shown once.
+Both products deliver HMAC-SHA256 signed outbound webhooks. Register endpoints at [peerlytics.xyz/developers](https://peerlytics.xyz/developers?tab=account) (one key, both products) and store the secret returned on register — it is only shown once.
 
 ```bash
 # USDCtoFiat: deposit + otc events
@@ -142,25 +165,13 @@ WEBHOOK_SECRET=whsec_... npx tsx usdctofiat/webhook-receiver.ts
 WEBHOOK_SECRET=whsec_... npx tsx peerlytics/webhook-receiver.ts
 ```
 
-The verification pattern is the same across both: `t=<unix>,v1=<hex>` signature header, HMAC-SHA256 over `${timestamp}.${rawBody}`, 5-minute replay window. Copy the reference implementation straight into your server — it's ~150 LOC with no dependencies beyond `node:crypto`.
-
-## Deploy the demo
-
-The demo deploys to Vercel with root directory set to `demo/`.
-
-```bash
-cd demo
-vercel link          # link to your Vercel project
-vercel env add PEERLYTICS_API_KEY production
-vercel env add PEERLYTICS_API_KEY preview
-vercel --prod
-```
-
-The orderbook API key stays server-side and is never exposed to the browser.
+The verification pattern is identical across both: `t=<unix>,v1=<hex>` signature header, HMAC-SHA256 over `${timestamp}.${rawBody}`, 5-minute replay window. Copy the reference implementation straight into your server — it's ~150 LOC with no dependencies beyond `node:crypto`.
 
 ## Links
 
-- [Peerlytics Explorer](https://peerlytics.xyz/explorer)
+- [usdctofiat.xyz/developers](https://usdctofiat.xyz/developers) — offramp SDK landing + API reference
+- [peerlytics.xyz/developers](https://peerlytics.xyz/developers) — analytics SDK + API key dashboard
+- [Peerlytics Explorer](https://peerlytics.xyz/explorer) — protocol explorer and market intel
 - [ZKP2P Protocol](https://zkp2p.xyz)
 - [@andrewwilkinson](https://x.com/andrewwilkinson)
 
