@@ -127,7 +127,7 @@ export default function App() {
     deposits: loadDeposits,
     close: closeDeposit,
     step,
-    error,
+    lastError,
     txHash,
     depositId,
     isLoading,
@@ -662,9 +662,9 @@ export default function App() {
                 </InlineMessage>
               )}
 
-              {error && (
+              {lastError && (
                 <InlineMessage tone="error">
-                  {error.code}: {error.message}
+                  {lastError.code}: {lastError.message}
                 </InlineMessage>
               )}
             </article>

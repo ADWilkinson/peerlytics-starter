@@ -89,8 +89,15 @@ CURRENCIES.EUR.countryCode // "eu"
 ```ts
 import { useOfframp, usePeerExtensionRegistration } from "@usdctofiat/offramp/react";
 
-const { offramp, deposits, close, step, txHash, depositId, lastError, isLoading, reset } = useOfframp();
-// lastError is OfframpError | null — has .code, .step, .txHash, .depositId
+const {
+  offramp, deposits, close,
+  state, step, txHash, depositId,
+  lastError, isLoading, reset,
+} = useOfframp({ integratorId: "your-app", referralId: "partner-123" });
+// state: "idle" | "approving" | "registering" | "depositing" | "confirming" | "delegating" | "done" | "error"
+// step:  granular OfframpStep (also includes "resuming" and "restricting" — `state` collapses those into "delegating")
+// lastError: OfframpError | null — has .code, .step, .txHash, .depositId, .cause
+// (`error` is also returned for legacy callers but is deprecated — use `lastError`.)
 
 // PayPal + Wise extension handshake driver:
 const peer = usePeerExtensionRegistration(PLATFORMS.PAYPAL);
@@ -102,11 +109,14 @@ const peer = usePeerExtensionRegistration(PLATFORMS.PAYPAL);
 
 ```ts
 interface OfframpParams {
-  amount: string;           // USDC decimal, min 1
-  platform: PlatformEntry;  // PLATFORMS.REVOLUT etc
-  currency: CurrencyEntry;  // CURRENCIES.EUR etc
-  identifier: string;       // platform-specific (PayPal is paypal.me USERNAME, not email)
-  otcTaker?: string;        // restrict deposit to a single taker wallet
+  amount: string;            // USDC decimal, min 1
+  platform: PlatformEntry;   // PLATFORMS.REVOLUT etc
+  currency: CurrencyEntry;   // CURRENCIES.EUR etc
+  identifier: string;        // platform-specific (PayPal is paypal.me USERNAME, not email)
+  otcTaker?: string;         // restrict deposit to a single taker wallet
+  integratorId?: string;     // ERC-8021 attribution (telemetry)
+  referralId?: string;       // optional partner referral code (telemetry)
+  idempotencyKey?: string;   // per-wallet replay key, replays the first successful result for 10 minutes
 }
 
 interface OfframpResult {
@@ -134,7 +144,7 @@ type OfframpStep =
 
 interface DepositInfo {
   depositId: string;       // pass to close()
-  compositeId: string;
+  compositeId: string;     // escrowAddress_depositId
   txHash?: string;
   status: "active" | "empty" | "closed";
   remainingUsdc: number;
@@ -143,6 +153,7 @@ interface DepositInfo {
   fulfilledIntents: number;
   paymentMethods: string[];
   currencies: string[];
+  rateSource: string;      // pricing-mode tag from the indexer (e.g. "track_market", "fixed"); "unknown" when missing
   delegated: boolean;
   escrowAddress: string;
 }
@@ -234,7 +245,9 @@ Pass `otcTaker` to `offramp()` to whitelist a single taker wallet at creation ti
 
 Register outbound HMAC-SHA256 signed webhooks at https://usdctofiat.xyz/developers. Auth uses the same Peerlytics API key (same `paid-api-keys` collection, same `api-credits` pool). Registration is a Pro-plan feature — free-tier keys get `402 webhooks_require_pro`.
 
-Events: `deposit.created`, `deposit.filled`, `deposit.partially_filled`, `deposit.closed`, `otc.enabled`, `otc.disabled`, `otc.taken`.
+Events:
+- Live (delivered today): `deposit.created`, `deposit.filled`, `deposit.partially_filled`, `deposit.closed`, `otc.taken`.
+- Reserved (registerable, not yet emitted): `otc.enabled`, `otc.disabled`. The dispatcher does not currently fan these out — register them safely now and they'll start delivering when the dispatcher catches up.
 
 Delivery headers:
   X-Usdctofiat-Signature   t=<unix>,v1=<hex>

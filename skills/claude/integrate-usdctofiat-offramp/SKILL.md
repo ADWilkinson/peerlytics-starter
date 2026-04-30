@@ -7,7 +7,7 @@ description: Integrate the @usdctofiat/offramp SDK (v2.x) into a dApp to add USD
 
 ## Overview
 
-Guide the user to integrate `@usdctofiat/offramp` v2.x. Surface area: 1 primary function (`offramp()`), 4 helpers (`deposits`, `close`, `enableOtc`, `disableOtc`, `getOtcLink`), 2 const objects (`PLATFORMS`, `CURRENCIES`), 2 React hooks (`useOfframp`, `usePeerExtensionRegistration`).
+Guide the user to integrate `@usdctofiat/offramp` v2.x. Surface area: 1 primary function (`offramp()`), 5 helpers (`deposits`, `close`, `enableOtc`, `disableOtc`, `getOtcLink`), 2 const objects (`PLATFORMS`, `CURRENCIES`), 2 React hooks (`useOfframp`, `usePeerExtensionRegistration`).
 
 Companion docs:
 

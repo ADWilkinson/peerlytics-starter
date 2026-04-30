@@ -5,14 +5,17 @@
  * HMAC-SHA256 signature, rejects replay attempts outside a 5-minute window,
  * and prints each event.
  *
- * USDCtoFiat delivers these events:
+ * USDCtoFiat events. The dispatcher delivers these today:
  *   deposit.created
  *   deposit.filled
  *   deposit.partially_filled
  *   deposit.closed
+ *   otc.taken
+ *
+ * Registerable but reserved (the registry accepts them; the dispatcher does
+ * not currently fan them out):
  *   otc.enabled
  *   otc.disabled
- *   otc.taken
  *
  * Each POST includes:
  *   X-Usdctofiat-Signature   t=<unix>,v1=<hex>
