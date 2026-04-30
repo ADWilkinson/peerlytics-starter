@@ -58,9 +58,17 @@ usdctofiat/                  @usdctofiat/offramp examples
   otc-deposit.ts               create an OTC deposit restricted to a single taker
   manage-deposits.ts           list and inspect deposits for a wallet
   platform-explorer.ts         enumerate platforms, currencies, and validation
-  react-example.tsx            useOfframp hook usage in React
+  paypal-deposit.ts            v2 PayPal flow — paypal.me username + Peer extension fallback
+  react-example.tsx            useOfframp hook usage in React (Revolut)
+  paypal-react-example.tsx     useOfframp + usePeerExtensionRegistration handshake
   webhook-receiver.ts          HMAC-verified HTTPS receiver for deposit/otc events
   llms.txt                     LLM-friendly SDK reference
+
+templates/                   Scaffold-ready integrations (used by create-offramp-app)
+  next/                        Next.js 16 App Router + Privy
+  vite/                        Vite + React 19 + viem
+  telegram-bot/                Node 22 + grammy + viem (server-side maker bot)
+  README.md                    template selection + v1 → v2 upgrade notes
 
 skills/                      Claude Code skills for AI-assisted development
   claude/
