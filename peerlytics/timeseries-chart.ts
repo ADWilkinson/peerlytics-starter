@@ -79,24 +79,27 @@ async function main(): Promise<void> {
     to: parseBoundary(toRaw),
   });
 
-  if (!data.buckets.length) {
+  // `buckets` is the global single-series payload (null when groupBy is set).
+  // This script never sets groupBy, so buckets is the populated path.
+  const buckets = data.buckets ?? [];
+  if (!buckets.length) {
     console.log("No buckets in this window.");
     return;
   }
 
-  const max = data.buckets.reduce((acc, b) => Math.max(acc, b.value), 0);
-  const total = data.buckets.reduce((acc, b) => acc + b.value, 0);
+  const max = buckets.reduce((acc, b) => Math.max(acc, b.value), 0);
+  const total = buckets.reduce((acc, b) => acc + b.value, 0);
 
   console.log();
   console.log(fmt.bold(`  ${entity.toUpperCase()} · ${granularity}ly`));
   console.log(
     fmt.dim(
-      `  ${data.from.slice(0, 10)} → ${data.to.slice(0, 10)}  ·  ${data.buckets.length} buckets  ·  ${data.cached ? "cached" : "fresh"}`,
+      `  ${data.from.slice(0, 10)} → ${data.to.slice(0, 10)}  ·  ${buckets.length} buckets  ·  ${data.cached ? "cached" : "fresh"}`,
     ),
   );
   console.log();
 
-  for (const bucket of data.buckets) {
+  for (const bucket of buckets) {
     const label = granularity === "hour" ? bucket.bucket.slice(5, 16) : bucket.bucket;
     const bar = sparkbar(bucket.value, max);
     const value = formatValue(bucket.value);

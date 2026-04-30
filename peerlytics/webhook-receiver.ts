@@ -5,11 +5,14 @@
  * HMAC-SHA256 signature, rejects replay attempts outside a 5-minute window,
  * and prints each event.
  *
- * Peerlytics delivers these events:
+ * Peerlytics delivers these events (v2 wire format, aligned with `LiveEvent.type`):
  *   deposit.created
- *   intent.created
- *   intent.filled
- *   rate.updated
+ *   intent.signaled
+ *   intent.fulfilled
+ *   deposit.rate_updated
+ *
+ * Legacy aliases (`intent.created`, `intent.filled`, `rate.updated`) are still
+ * accepted on register but normalized to the names above on delivery.
  *
  * Headers:
  *   X-Peerlytics-Signature   t=<unix>,v1=<hex>
@@ -159,7 +162,7 @@ createServer((req, res) => {
   console.log("  Next steps:");
   console.log("    1. Expose this port publicly (ngrok http " + PORT + ", cloudflared, etc.)");
   console.log("    2. Register the public URL at https://peerlytics.xyz/developers");
-  console.log("    3. Choose events like intent.filled or rate.updated");
+  console.log("    3. Choose events like intent.fulfilled or deposit.rate_updated");
   console.log("    4. Save the secret returned on register — use it as WEBHOOK_SECRET");
   console.log();
 });

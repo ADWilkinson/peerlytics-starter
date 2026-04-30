@@ -120,11 +120,14 @@ const { orderbooks } = await client.getOrderbook({ currency: "USD", platform: "r
 
 Auth options: [free API key](https://peerlytics.xyz/developers?tab=account) (1,000 requests/month) or x402 pay-per-request with USDC on Base.
 
-**Gotchas worth knowing upfront** (SDK ≥ 0.4.0):
+**Gotchas worth knowing upfront** (SDK ≥ 1.0, Stripe-style v2 wire format):
 
 - List methods (`getActivity`, `getDeposits`, `getIntents`, `getMarketSummary`) return paginated envelopes like `{ events, count, hasMore, ... }` — iterate over `.events` / `.deposits` / etc, not the top-level result.
 - `getDeposits()` requires at least one of `depositor`, `delegate`, `platform`, `currency`; `getIntents()` requires at least one of `owner`, `recipient`, `verifier`, `depositId`, `status`. Both throw `ValidationError` client-side if called empty.
 - `DepositMarket.currency` / `deposit.currencies[].currency` are resolved ISO codes (e.g. `"GBP"`). `currencyCode` is the raw bytes32 hash — use `currency` for display.
+- Key management uses the opaque `id` from `listKeys()` (not the raw key): `deleteKey(id)`, `rotateKey(idOrKey)`, `createKey(label?)`.
+- Webhook event vocabulary aligned with `LiveEvent.type`: `intent.signaled`, `intent.fulfilled`, `deposit.rate_updated`. Legacy names (`intent.created`, `intent.filled`, `rate.updated`) are accepted on register but normalized server-side.
+- Some timestamp fields (`ApiKeyInfo.createdAt`, `lastUsedAt`, `freeCreditsResetAt`) are typed `number | string` — v2 emits Unix seconds (integer); convert with `Number(value) * 1000` to get a JS `Date`.
 
 [npm](https://www.npmjs.com/package/@peerlytics/sdk) · [Developer portal](https://peerlytics.xyz/developers) · [OpenAPI spec](https://peerlytics.xyz/api/openapi) · [llms.txt](https://peerlytics.xyz/llms.txt)
 
@@ -161,7 +164,7 @@ Both products deliver HMAC-SHA256 signed outbound webhooks. Register endpoints a
 # USDCtoFiat: deposit + otc events
 WEBHOOK_SECRET=whsec_... npx tsx usdctofiat/webhook-receiver.ts
 
-# Peerlytics: deposit / intent / rate events
+# Peerlytics: deposit.created / intent.signaled / intent.fulfilled / deposit.rate_updated
 WEBHOOK_SECRET=whsec_... npx tsx peerlytics/webhook-receiver.ts
 ```
 

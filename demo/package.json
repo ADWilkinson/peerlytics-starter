@@ -11,7 +11,7 @@
     "deploy:preview": "bash scripts/deploy.sh"
   },
   "dependencies": {
-    "@peerlytics/sdk": "^0.5.3",
+    "@peerlytics/sdk": "^1.0.1",
     "@usdctofiat/offramp": "^2.0.4",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
