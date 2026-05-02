@@ -6,3 +6,5 @@ dist/
 .playwright-mcp/
 playwright-*.png
 .env*.local
+
+.claude/
