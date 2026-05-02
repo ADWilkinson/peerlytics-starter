@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import {
   fetchOrderbookSnapshot,
@@ -15,14 +15,12 @@ export default defineConfig({
           if (id.includes("node_modules/react") || id.includes("node_modules/react-dom")) {
             return "react";
           }
-
           if (
             id.includes("node_modules/@usdctofiat/offramp") ||
             id.includes("node_modules/viem")
           ) {
             return "wallet";
           }
-
           return undefined;
         },
       },
@@ -30,24 +28,10 @@ export default defineConfig({
   },
 });
 
-function peerlyticsOrderbookProxy() {
+function peerlyticsOrderbookProxy(): Plugin {
   return {
     name: "peerlytics-orderbook-proxy",
-    configureServer(server: {
-      middlewares: {
-        use: (
-          handler: (
-            req: { url?: string },
-            res: {
-              statusCode: number;
-              setHeader: (name: string, value: string) => void;
-              end: (body: string) => void;
-            },
-            next: () => void,
-          ) => void | Promise<void>,
-        ) => void;
-      };
-    }) {
+    configureServer(server) {
       server.middlewares.use(async (req, res, next) => {
         if (!req.url?.startsWith("/api/orderbook")) {
           next();
@@ -55,9 +39,7 @@ function peerlyticsOrderbookProxy() {
         }
 
         if (!getPeerlyticsApiKey()) {
-          res.statusCode = 500;
-          res.setHeader("Content-Type", "application/json");
-          res.end(JSON.stringify({ error: "Missing PEERLYTICS_API_KEY." }));
+          sendJson(res, 500, { error: "Missing PEERLYTICS_API_KEY." });
           return;
         }
 
@@ -66,26 +48,31 @@ function peerlyticsOrderbookProxy() {
         const currency = url.searchParams.get("currency") ?? "";
 
         if (!isSupportedRoute(platform, currency)) {
-          res.statusCode = 400;
-          res.setHeader("Content-Type", "application/json");
-          res.end(JSON.stringify({ error: "Unsupported route." }));
+          sendJson(res, 400, { error: "Unsupported route." });
           return;
         }
 
         try {
           const payload = await fetchOrderbookSnapshot(platform, currency);
-          res.statusCode = 200;
-          res.setHeader("Content-Type", "application/json");
-          res.end(JSON.stringify(payload));
+          sendJson(res, 200, payload);
         } catch (error) {
           const message =
             error instanceof Error ? error.message : "Unable to load orderbook.";
-
-          res.statusCode = 502;
-          res.setHeader("Content-Type", "application/json");
-          res.end(JSON.stringify({ error: message }));
+          sendJson(res, 502, { error: message });
         }
       });
     },
   };
+}
+
+type JsonResponse = {
+  statusCode: number;
+  setHeader: (name: string, value: string) => void;
+  end: (body: string) => void;
+};
+
+function sendJson(res: JsonResponse, status: number, body: unknown): void {
+  res.statusCode = status;
+  res.setHeader("Content-Type", "application/json");
+  res.end(JSON.stringify(body));
 }

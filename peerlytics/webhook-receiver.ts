@@ -1,9 +1,10 @@
 /**
  * webhook-receiver.ts
  *
- * Minimal HTTPS receiver for Peerlytics outbound webhooks. Verifies the
+ * Minimal HTTP receiver for Peerlytics outbound webhooks. Verifies the
  * HMAC-SHA256 signature, rejects replay attempts outside a 5-minute window,
- * and prints each event.
+ * and prints each event. Front it with ngrok or Cloudflare Tunnel for a
+ * public HTTPS URL.
  *
  * Peerlytics delivers these events (v2 wire format, aligned with `LiveEvent.type`):
  *   deposit.created

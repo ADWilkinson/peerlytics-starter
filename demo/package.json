@@ -1,7 +1,7 @@
 {
   "name": "peerlytics-offramp-showcase",
   "version": "0.1.0",
-  "description": "Beautifully minimal Vite + React starter for Peerlytics and the USDCtoFiat offramp SDK",
+  "description": "Vite + React demo for @peerlytics/sdk and @usdctofiat/offramp",
   "private": true,
   "type": "module",
   "scripts": {

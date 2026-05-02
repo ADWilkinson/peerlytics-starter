@@ -99,9 +99,9 @@ select {
 
 .wallet-badge {
   display: inline-flex;
-  gap: 8px;
+  gap: 10px;
   align-items: center;
-  padding: 10px 14px;
+  padding: 8px 8px 8px 14px;
   border: 1px solid var(--border);
   border-radius: 999px;
   background: var(--surface-strong);
@@ -110,20 +110,34 @@ select {
   font-size: 12px;
 }
 
+.wallet-address {
+  letter-spacing: 0.01em;
+}
+
 .wallet-dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
   background: var(--success);
   flex-shrink: 0;
+  box-shadow: 0 0 0 3px rgba(24, 95, 73, 0.12);
 }
 
-.chain-label {
-  font-size: 11px;
-  color: var(--text-faint);
+.chain-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border: 1px solid rgba(27, 94, 78, 0.16);
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
 }
 
-.chain-wrong {
+.chain-pill-wrong {
+  border-color: rgba(162, 58, 46, 0.22);
+  background: rgba(162, 58, 46, 0.08);
   color: var(--danger);
 }
 
@@ -152,9 +166,9 @@ h3 {
 }
 
 h1 {
-  max-width: 10ch;
+  max-width: 14ch;
   font-size: clamp(2rem, 5vw, 3.2rem);
-  line-height: 0.94;
+  line-height: 0.96;
 }
 
 h2 {
@@ -173,6 +187,15 @@ h3 {
   color: var(--text-soft);
   font-size: 15px;
   line-height: 1.65;
+}
+
+.page-subheading code {
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: rgba(18, 18, 18, 0.05);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 13px;
+  color: #1a1a1a;
 }
 
 .sdk-badges {
@@ -196,6 +219,11 @@ h3 {
     border-color 140ms ease;
 }
 
+.sdk-badge:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(27, 94, 78, 0.18);
+}
+
 .sdk-badge-peerlytics {
   border-color: rgba(27, 94, 78, 0.2);
   background: var(--accent-soft);
@@ -214,6 +242,10 @@ h3 {
 
 .sdk-badge-offramp:hover {
   background: rgba(163, 124, 58, 0.13);
+}
+
+.sdk-badge-offramp:focus-visible {
+  box-shadow: 0 0 0 3px rgba(163, 124, 58, 0.18);
 }
 
 /* ─────────────────────────────────────────
@@ -297,11 +329,6 @@ h3 {
    SDK Pills
 ───────────────────────────────────────── */
 
-.eyebrow {
-  margin-bottom: 8px;
-}
-
-.eyebrow,
 .value-tile span,
 .book-header,
 .status,
@@ -376,6 +403,12 @@ h3 {
   border-color: rgba(27, 94, 78, 0.2);
 }
 
+.install-cmd:focus-visible {
+  outline: none;
+  border-color: rgba(27, 94, 78, 0.3);
+  box-shadow: 0 0 0 3px rgba(27, 94, 78, 0.12);
+}
+
 .install-cmd-offramp {
   border-color: rgba(163, 124, 58, 0.14);
   background: rgba(163, 124, 58, 0.04);
@@ -384,6 +417,12 @@ h3 {
 .install-cmd-offramp:hover {
   background: rgba(163, 124, 58, 0.08);
   border-color: rgba(163, 124, 58, 0.22);
+}
+
+.install-cmd-offramp:focus-visible {
+  outline: none;
+  border-color: rgba(163, 124, 58, 0.32);
+  box-shadow: 0 0 0 3px rgba(163, 124, 58, 0.12);
 }
 
 .install-prompt {
@@ -452,6 +491,13 @@ h3 {
   color: rgba(204, 200, 190, 0.85);
 }
 
+.code-copy-btn:focus-visible {
+  outline: none;
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.22);
+  color: rgba(204, 200, 190, 0.95);
+}
+
 /* ─────────────────────────────────────────
    Card
 ───────────────────────────────────────── */
@@ -512,10 +558,10 @@ h3 {
   border-color: var(--border-strong);
 }
 
-.route-select:focus {
+.route-select:focus-visible {
   outline: none;
-  border-color: rgba(27, 94, 78, 0.22);
-  box-shadow: 0 0 0 3px rgba(27, 94, 78, 0.07);
+  border-color: rgba(27, 94, 78, 0.32);
+  box-shadow: 0 0 0 3px rgba(27, 94, 78, 0.12);
 }
 
 /* ─────────────────────────────────────────
@@ -556,11 +602,11 @@ h3 {
     background-color 140ms ease;
 }
 
-.field input:focus,
-.field select:focus {
+.field input:focus-visible,
+.field select:focus-visible {
   outline: none;
-  border-color: rgba(27, 94, 78, 0.22);
-  box-shadow: 0 0 0 4px rgba(27, 94, 78, 0.08);
+  border-color: rgba(27, 94, 78, 0.32);
+  box-shadow: 0 0 0 4px rgba(27, 94, 78, 0.1);
 }
 
 .field-wide,
@@ -613,12 +659,12 @@ h3 {
     background-color 140ms ease,
     border-color 140ms ease,
     box-shadow 140ms ease,
-    opacity 140ms ease,
-    transform 140ms ease;
+    opacity 140ms ease;
 }
 
-.button:hover:not(:disabled) {
-  transform: translateY(-1px);
+.button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(27, 94, 78, 0.22);
 }
 
 .button:disabled {
@@ -634,12 +680,18 @@ h3 {
 
 .button-primary:hover:not(:disabled) {
   background: var(--accent-strong);
+  box-shadow: 0 12px 28px rgba(27, 94, 78, 0.22);
 }
 
 .button-secondary {
   background: rgba(255, 255, 255, 0.62);
   border-color: var(--border);
   color: inherit;
+}
+
+.button-secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.88);
+  border-color: var(--border-strong);
 }
 
 /* ─────────────────────────────────────────
@@ -676,6 +728,7 @@ h3 {
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 8px;
   margin-top: 16px;
+  text-align: center;
 }
 
 .step-item {
@@ -742,8 +795,15 @@ h3 {
 }
 
 .book-row {
-  padding: 12px 0;
+  padding: 12px 8px;
+  margin: 0 -8px;
+  border-radius: 12px;
   border-bottom: 1px solid rgba(18, 18, 18, 0.06);
+  transition: background-color 140ms ease;
+}
+
+.book-row:hover {
+  background: rgba(27, 94, 78, 0.03);
 }
 
 .book-row:last-child {
@@ -881,7 +941,7 @@ h3 {
   color: var(--accent);
 }
 
-.status-manual {
+.status-self {
   color: var(--text-soft);
 }
 
@@ -905,23 +965,6 @@ h3 {
   margin-top: 18px;
   color: var(--text-soft);
   font-size: 14px;
-}
-
-/* ─────────────────────────────────────────
-   Powered-by label
-───────────────────────────────────────── */
-
-.powered-by {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 9px;
-  border: 1px solid rgba(27, 94, 78, 0.14);
-  border-radius: 999px;
-  background: var(--accent-soft);
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 10px;
-  letter-spacing: 0.04em;
-  color: var(--accent);
 }
 
 /* ─────────────────────────────────────────
@@ -968,6 +1011,17 @@ h3 {
   color: inherit;
   text-decoration-color: rgba(18, 18, 18, 0.18);
   text-underline-offset: 0.22em;
+  border-radius: 4px;
+}
+
+.footer-copy a:hover {
+  text-decoration-color: var(--accent);
+  color: var(--accent);
+}
+
+.footer-copy a:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(27, 94, 78, 0.18);
 }
 
 /* ─────────────────────────────────────────
@@ -1011,10 +1065,6 @@ h3 {
     align-items: stretch;
   }
 
-  .step-rail {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .deposit-values {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1048,7 +1098,12 @@ h3 {
   }
 
   .step-rail {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+  }
+
+  .step-item {
+    padding: 9px 6px;
+    font-size: 11px;
   }
 
   /* Compact 2-column book table: rate + liquidity, hide deposit count */

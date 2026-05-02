@@ -70,7 +70,6 @@ const client = new Peerlytics({
   apiKey: process.env.PEERLYTICS_API_KEY,
 });
 
-// Live orderbook — server-side, API-keyed
 const { orderbooks } = await client.getOrderbook({
   currency: "GBP",
   platform: "revolut",
@@ -81,7 +80,6 @@ import { PLATFORMS, CURRENCIES } from "@usdctofiat/offramp";
 
 const { offramp } = useOfframp();
 
-// Delegated sell — resumable, multi-step
 await offramp(walletClient, {
   amount: "100",
   platform: PLATFORMS.REVOLUT,
@@ -435,14 +433,14 @@ export default function App() {
         {/* ── Topbar ── */}
         <header className="topbar">
           <div className="topbar-brand">
-            <span className="brand-mono">peerlytics & usdctofiat demo</span>
+            <span className="brand-mono">peerlytics + usdctofiat</span>
           </div>
           <div className="topbar-actions">
             {walletSession ? (
               <div className="wallet-badge">
-                <span className="wallet-dot" />
-                <span>{shortenAddress(walletSession.address)}</span>
-                <span className={`chain-label${isBaseNetwork ? "" : " chain-wrong"}`}>
+                <span className="wallet-dot" aria-hidden="true" />
+                <span className="wallet-address">{shortenAddress(walletSession.address)}</span>
+                <span className={`chain-pill${isBaseNetwork ? "" : " chain-pill-wrong"}`}>
                   {isBaseNetwork ? "Base" : "Wrong network"}
                 </span>
               </div>
@@ -453,7 +451,7 @@ export default function App() {
                 onClick={handleConnectWallet}
                 disabled={isConnecting}
               >
-                {isConnecting ? "Connecting..." : "Connect wallet"}
+                {isConnecting ? "Connecting…" : "Connect wallet"}
               </button>
             )}
           </div>
@@ -461,10 +459,11 @@ export default function App() {
 
         {/* ── Page header ── */}
         <div className="page-header">
-          <h1>Build on Peer.</h1>
+          <h1>USDC ↔ fiat on Base.</h1>
           <p className="page-subheading">
-            Two production-ready SDKs for P2P FX markets on Base.
-            Server-side orderbook analytics and wallet-native delegated off-ramps.
+            Wallet-native off-ramps with <code>@usdctofiat/offramp</code>. Server-side
+            orderbook and activity data with <code>@peerlytics/sdk</code>. Both ship
+            on the ZKP2P protocol.
           </p>
           <div className="sdk-badges">
             <a
@@ -503,15 +502,15 @@ export default function App() {
 
             <h3 className="strip-name">USDCtoFiat</h3>
             <p className="strip-desc">
-              Delegated off-ramp for Base. Sell USDC to fiat across 10+
-              platforms and 30+ currencies with a single React hook —
-              resumable, idempotent, and battle-tested.
+              Sell USDC for fiat on 10 platforms and 34 currencies. One React
+              hook covers approval, registration, deposit, and delegation —
+              resumable across reloads and signature failures.
             </p>
 
             <ul className="strip-features">
-              <li>This demo showcases Revolut and Venmo</li>
-              <li>Resumable multi-step deposit flows</li>
-              <li>React hook: approve, register, deposit, delegate</li>
+              <li>Resumable multi-step deposit flow</li>
+              <li>OTC private orders with a single taker wallet</li>
+              <li>Demo wired for Revolut and Venmo</li>
             </ul>
 
             <button
@@ -623,7 +622,7 @@ export default function App() {
                     className="button button-primary"
                     disabled={!canSubmit}
                   >
-                    {isLoading ? "Creating..." : "Create deposit"}
+                    {isLoading ? "Creating…" : "Create deposit"}
                   </button>
                 </div>
               </form>
@@ -688,15 +687,15 @@ export default function App() {
 
             <h3 className="strip-name">Peerlytics</h3>
             <p className="strip-desc">
-              Real-time analytics for the ZKP2P protocol. Query live orderbook
-              data, activity feeds, and maker stats from your server with a single
-              API key.
+              Server-side data on the ZKP2P protocol — orderbooks, activity
+              feeds, maker portfolios. One API key, 1,000 free requests a
+              month, or pay per request with x402.
             </p>
 
             <ul className="strip-features">
-              <li>Live orderbook with rate levels and depth</li>
-              <li>Activity feed with typed event filtering</li>
-              <li>Maker portfolio and volume analytics</li>
+              <li>Live orderbook by rate level</li>
+              <li>Typed event filters and SSE streaming</li>
+              <li>Maker, taker, integrator, and vault rollups</li>
             </ul>
 
             <button
@@ -733,11 +732,11 @@ export default function App() {
                 <div className="route-controls">
                   <select
                     className="route-select"
+                    aria-label="Orderbook platform"
                     value={selectedMarket.platform.id}
-                    onChange={(event) => {
-                      setSelectedPlatformId(event.target.value as AllowedPlatformId);
-                      setIdentifier("");
-                    }}
+                    onChange={(event) =>
+                      setSelectedPlatformId(event.target.value as AllowedPlatformId)
+                    }
                   >
                     {allowedMarkets.map((entry) => (
                       <option key={entry.platform.id} value={entry.platform.id}>
@@ -747,6 +746,7 @@ export default function App() {
                   </select>
                   <select
                     className="route-select"
+                    aria-label="Orderbook currency"
                     value={currency.code}
                     onChange={(event) => setSelectedCurrencyCode(event.target.value)}
                   >
@@ -766,7 +766,7 @@ export default function App() {
               <div className="book-summary">
                 <ValueTile
                   label="Best rate"
-                  value={isOrderbookLoading ? "..." : formatRate(orderbookState.orderbook?.bestRate, currency.code)}
+                  value={isOrderbookLoading ? "—" : formatRate(orderbookState.orderbook?.bestRate, currency.code)}
                   accent={!isOrderbookLoading && Boolean(orderbookState.orderbook?.bestRate)}
                 />
                 <ValueTile
@@ -818,7 +818,7 @@ export default function App() {
                 <div className="empty-state">
                   <p>
                     {isOrderbookLoading
-                      ? "Loading orderbook..."
+                      ? "Loading orderbook…"
                       : "No visible levels for this route right now."}
                   </p>
                 </div>
@@ -831,9 +831,6 @@ export default function App() {
         <section className="card deposits-card">
           <div className="section-head">
             <div>
-              <p className="eyebrow">
-                <span className="powered-by">@usdctofiat/offramp</span>
-              </p>
               <h2>Active deposits</h2>
             </div>
             {walletSession && (
@@ -845,7 +842,7 @@ export default function App() {
                 }}
                 disabled={isDepositsLoading}
               >
-                {isDepositsLoading ? "Refreshing..." : "Refresh"}
+                {isDepositsLoading ? "Refreshing…" : "Refresh"}
               </button>
             )}
           </div>
@@ -886,10 +883,10 @@ export default function App() {
                   <div className="deposit-flags">
                     <span
                       className={`status ${
-                        item.delegated ? "status-delegated" : "status-manual"
+                        item.delegated ? "status-delegated" : "status-self"
                       }`}
                     >
-                      {item.delegated ? "delegated" : "manual"}
+                      {item.delegated ? "delegated" : "self-managed"}
                     </span>
                     <button
                       type="button"
@@ -899,7 +896,7 @@ export default function App() {
                       }}
                       disabled={closingDepositId === item.depositId || item.remainingUsdc === 0}
                     >
-                      {closingDepositId === item.depositId ? "Withdrawing..." : "Withdraw"}
+                      {closingDepositId === item.depositId ? "Withdrawing…" : "Withdraw"}
                     </button>
                   </div>
                 </div>
@@ -929,31 +926,31 @@ export default function App() {
         {/* ── Footer ── */}
         <footer className="site-foot">
           <p className="footer-copy">
-            Built with the{" "}
-            <a
-              href="https://www.npmjs.com/package/@usdctofiat/offramp"
-              target="_blank"
-              rel="noreferrer"
-            >
-              offramp sdk
-            </a>
-            , the{" "}
-            <a
-              href="https://www.npmjs.com/package/@peerlytics/sdk"
-              target="_blank"
-              rel="noreferrer"
-            >
-              peerlytics sdk
-            </a>
-            , and the{" "}
+            Source on{" "}
             <a
               href="https://github.com/ADWilkinson/usdctofiat-peerlytics-starters"
               target="_blank"
               rel="noreferrer"
             >
-              starter repo
+              GitHub
             </a>
-            . More from{" "}
+            . Built on{" "}
+            <a
+              href="https://www.npmjs.com/package/@usdctofiat/offramp"
+              target="_blank"
+              rel="noreferrer"
+            >
+              @usdctofiat/offramp
+            </a>{" "}
+            and{" "}
+            <a
+              href="https://www.npmjs.com/package/@peerlytics/sdk"
+              target="_blank"
+              rel="noreferrer"
+            >
+              @peerlytics/sdk
+            </a>
+            , by{" "}
             <a href="https://x.com/andrewwilkinson" target="_blank" rel="noreferrer">
               @andrewwilkinson
             </a>
@@ -969,10 +966,10 @@ export default function App() {
 
 function InlineMessage({
   children,
-  tone = "muted",
+  tone,
 }: {
   children: React.ReactNode;
-  tone?: "muted" | "error" | "success";
+  tone: "error" | "success";
 }) {
   return <div className={`inline-message ${tone}`}>{children}</div>;
 }

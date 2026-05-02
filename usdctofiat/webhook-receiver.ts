@@ -1,9 +1,10 @@
 /**
  * webhook-receiver.ts
  *
- * Minimal HTTPS receiver for USDCtoFiat outbound webhooks. Verifies the
+ * Minimal HTTP receiver for USDCtoFiat outbound webhooks. Verifies the
  * HMAC-SHA256 signature, rejects replay attempts outside a 5-minute window,
- * and prints each event.
+ * and prints each event. Front it with ngrok or Cloudflare Tunnel for a
+ * public HTTPS URL.
  *
  * USDCtoFiat events. The dispatcher delivers these today:
  *   deposit.created

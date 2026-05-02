@@ -1,6 +1,6 @@
 # Peerlytics & USDCtoFiat Starters
 
-Production-ready examples and a live demo for the two SDKs that cover the ZKP2P protocol on Base: server-side analytics with **@peerlytics/sdk** and wallet-native USDC off-ramps with **@usdctofiat/offramp**.
+Examples and a live demo for the two SDKs covering the ZKP2P protocol on Base: server-side analytics with **@peerlytics/sdk** and wallet-native USDC off-ramps with **@usdctofiat/offramp**.
 
 [![npm: @peerlytics/sdk](https://img.shields.io/npm/v/@peerlytics/sdk?label=%40peerlytics%2Fsdk&color=1b5e4e)](https://www.npmjs.com/package/@peerlytics/sdk)
 [![npm: @usdctofiat/offramp](https://img.shields.io/npm/v/@usdctofiat/offramp?label=%40usdctofiat%2Fofframp&color=6e4a0e)](https://www.npmjs.com/package/@usdctofiat/offramp)
@@ -21,7 +21,7 @@ const { depositId, txHash } = await offramp(walletClient, {
 });
 ```
 
-That single call approves USDC, creates the escrow deposit on Base, and delegates pricing to the managed vault. Your users settle on Revolut, Venmo, Wise, CashApp, Zelle, Monzo, or PayPal without leaving your app.
+That single call approves USDC, creates the escrow deposit on Base, and delegates pricing to the managed vault. Settlement runs on Revolut, Venmo, Wise, CashApp, Zelle, Monzo, or PayPal — your users never leave your app.
 
 Need a fresh app skeleton instead of dropping into an existing one?
 
@@ -29,7 +29,7 @@ Need a fresh app skeleton instead of dropping into an existing one?
 npx create-offramp-app@latest my-offramp --template=next         # next | vite | telegram-bot
 ```
 
-**Agent skills (Claude Code, Cursor):** [`integrate-usdctofiat-offramp`](skills/claude/integrate-usdctofiat-offramp/SKILL.md) · [`query-peerlytics-data`](skills/claude/query-peerlytics-data/SKILL.md). Or hand the canonical `llms-full.txt` files to any assistant: [usdctofiat.xyz/llms-full.txt](https://usdctofiat.xyz/llms-full.txt) · [peerlytics.xyz/llms-full.txt](https://peerlytics.xyz/llms-full.txt).
+**Agent skills (Claude Code, Cursor):** [`integrate-usdctofiat-offramp`](skills/claude/integrate-usdctofiat-offramp/SKILL.md) · [`query-peerlytics-data`](skills/claude/query-peerlytics-data/SKILL.md). For other assistants, hand them the canonical `llms-full.txt`: [usdctofiat.xyz/llms-full.txt](https://usdctofiat.xyz/llms-full.txt) · [peerlytics.xyz/llms-full.txt](https://peerlytics.xyz/llms-full.txt).
 
 ## What's in this repo
 
@@ -117,7 +117,7 @@ The orderbook API key stays server-side and is never exposed to the browser.
 
 ### @peerlytics/sdk
 
-Real-time analytics for the ZKP2P protocol. Orderbooks, activity feeds, maker stats, vault data.
+Server-side data on the ZKP2P protocol — orderbooks, activity feeds, maker portfolios, vault stats.
 
 ```ts
 import { Peerlytics } from "@peerlytics/sdk";
@@ -126,9 +126,9 @@ const client = new Peerlytics({ apiKey: "pk_live_..." });
 const { orderbooks } = await client.getOrderbook({ currency: "USD", platform: "revolut" });
 ```
 
-Auth options: [free API key](https://peerlytics.xyz/developers?tab=account) (1,000 requests/month) or x402 pay-per-request with USDC on Base.
+Auth: [free API key](https://peerlytics.xyz/developers?tab=account) (1,000 requests/month) or x402 pay-per-request with USDC on Base.
 
-**Gotchas worth knowing upfront** (SDK ≥ 1.0, Stripe-style v2 wire format):
+**Gotchas worth knowing** (SDK ≥ 1.0, Stripe-style v2 wire format):
 
 - List methods (`getActivity`, `getDeposits`, `getIntents`, `getMarketSummary`) return paginated envelopes like `{ events, count, hasMore, ... }` — iterate over `.events` / `.deposits` / etc, not the top-level result.
 - `getDeposits()` requires at least one of `depositor`, `delegate`, `platform`, `currency`; `getIntents()` requires at least one of `owner`, `recipient`, `verifier`, `depositId`, `status`. Both throw `ValidationError` client-side if called empty.
@@ -141,7 +141,7 @@ Auth options: [free API key](https://peerlytics.xyz/developers?tab=account) (1,0
 
 ### @usdctofiat/offramp
 
-Delegated USDC-to-fiat off-ramp on Base. Revolut, Venmo, Wise, PayPal, and more.
+Delegated USDC-to-fiat off-ramp on Base. Revolut, Venmo, Wise, PayPal, CashApp, Zelle, Monzo, and more.
 
 ```ts
 import { useOfframp } from "@usdctofiat/offramp/react";
@@ -156,9 +156,9 @@ await offramp(walletClient, {
 });
 ```
 
-Need a private order? Pass `otcTaker` to restrict the deposit to a single wallet — or use `enableOtc` / `disableOtc` / `getOtcLink` to retrofit restriction on an existing deposit. See `usdctofiat/otc-deposit.ts` for both paths.
+Pass `otcTaker` to restrict a deposit to one wallet, or use `enableOtc` / `disableOtc` / `getOtcLink` to retrofit a public deposit. Both paths are in `usdctofiat/otc-deposit.ts`.
 
-**PayPal and Wise** makers must register their handle in the Peer (PeerAuth) browser extension before the first deposit. v2 adds a new `EXTENSION_REGISTRATION_REQUIRED` error code plus `usePeerExtensionRegistration(platform)` to drive the install / connect / verify flow. See `usdctofiat/paypal-react-example.tsx` and `usdctofiat/paypal-deposit.ts`. PayPal uses the `paypal.me` **username** — not the account email.
+**PayPal and Wise** makers must register their handle in the Peer (PeerAuth) browser extension before the first deposit. v2 throws `EXTENSION_REGISTRATION_REQUIRED` and ships `usePeerExtensionRegistration(platform)` to drive the install / connect / verify flow. See `usdctofiat/paypal-react-example.tsx` and `usdctofiat/paypal-deposit.ts`. PayPal uses the `paypal.me` **username**, not the account email.
 
 Supported platforms: Revolut, Venmo, CashApp, Chime, Wise, Mercado Pago, Zelle, PayPal, Monzo, N26.
 
@@ -166,7 +166,7 @@ Supported platforms: Revolut, Venmo, CashApp, Chime, Wise, Mercado Pago, Zelle, 
 
 ## Webhooks
 
-Both products deliver HMAC-SHA256 signed outbound webhooks. Register endpoints at [peerlytics.xyz/developers](https://peerlytics.xyz/developers?tab=account) (one key, both products) and store the secret returned on register — it is only shown once.
+Both products deliver HMAC-SHA256 signed outbound webhooks. Register endpoints at [peerlytics.xyz/developers](https://peerlytics.xyz/developers?tab=account) (one key, both products). Store the secret returned on register — it is only shown once.
 
 ```bash
 # USDCtoFiat: deposit + otc events
@@ -176,7 +176,7 @@ WEBHOOK_SECRET=whsec_... npx tsx usdctofiat/webhook-receiver.ts
 WEBHOOK_SECRET=whsec_... npx tsx peerlytics/webhook-receiver.ts
 ```
 
-The verification pattern is identical across both: `t=<unix>,v1=<hex>` signature header, HMAC-SHA256 over `${timestamp}.${rawBody}`, 5-minute replay window. Copy the reference implementation straight into your server — it's ~150 LOC with no dependencies beyond `node:crypto`.
+Verification is identical across both: `t=<unix>,v1=<hex>` header, HMAC-SHA256 over `${timestamp}.${rawBody}`, 5-minute replay window. Each receiver is ~150 LOC with no dependencies beyond `node:crypto` — copy it straight into your server.
 
 ## Links
 

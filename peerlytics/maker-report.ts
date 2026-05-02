@@ -31,7 +31,6 @@ const fmt = {
   pct: (n: number) => `${(n * 100).toFixed(2)}%`,
   addr: (s: string) => (s.length <= 14 ? s : `${s.slice(0, 6)}...${s.slice(-4)}`),
   pad: (s: string, n: number) => (s.length >= n ? s.slice(0, n) : s + " ".repeat(n - s.length)),
-  rpad: (s: string, n: number) => (s.length >= n ? s.slice(0, n) : " ".repeat(n - s.length) + s),
 };
 
 const W = 62;

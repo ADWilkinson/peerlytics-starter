@@ -33,7 +33,6 @@ const fmt = {
   },
   rate: (n: number) => n.toFixed(4),
   pad: (s: string, n: number) => (s.length >= n ? s.slice(0, n) : s + " ".repeat(n - s.length)),
-  rpad: (s: string, n: number) => (s.length >= n ? s.slice(0, n) : " ".repeat(n - s.length) + s),
   bar: (ratio: number, width: number) => {
     const filled = Math.round(ratio * width);
     return "█".repeat(filled) + "░".repeat(width - filled);
