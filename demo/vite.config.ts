@@ -65,13 +65,11 @@ function peerlyticsOrderbookProxy(): Plugin {
   };
 }
 
-type JsonResponse = {
-  statusCode: number;
-  setHeader: (name: string, value: string) => void;
-  end: (body: string) => void;
-};
-
-function sendJson(res: JsonResponse, status: number, body: unknown): void {
+function sendJson(
+  res: { statusCode: number; setHeader: (name: string, value: string) => void; end: (body: string) => void },
+  status: number,
+  body: unknown,
+): void {
   res.statusCode = status;
   res.setHeader("Content-Type", "application/json");
   res.end(JSON.stringify(body));
