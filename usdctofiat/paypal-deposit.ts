@@ -5,7 +5,7 @@
  * (upstream zkp2p-clients #649). A Node CLI can't drive that handshake
  * directly — the Peer extension only lives in a browser — so this script
  * demonstrates the graceful fallback: detect the new
- * EXTENSION_REGISTRATION_REQUIRED error from @usdctofiat/offramp v2 and
+ * EXTENSION_REGISTRATION_REQUIRED error from @usdctofiat/offramp and
  * print a clear message pointing the operator at usdctofiat.xyz (where the
  * React surface can complete the handshake).
  *
@@ -104,7 +104,7 @@ async function main() {
       process.exit(1);
     }
 
-    // New in v2: curator rejects PayPal and Wise makers until the user has
+    // Curator rejects PayPal and Wise makers until the user has
     // registered their handle inside the Peer (PeerAuth) browser extension.
     // A Node CLI can't drive that handshake; print a clear recovery path.
     if (err.code === OFFRAMP_ERROR_CODES.EXTENSION_REGISTRATION_REQUIRED) {

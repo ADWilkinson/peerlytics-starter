@@ -58,7 +58,7 @@ usdctofiat/                  @usdctofiat/offramp examples
   otc-deposit.ts               create an OTC deposit restricted to a single taker
   manage-deposits.ts           list and inspect deposits for a wallet
   platform-explorer.ts         enumerate platforms, currencies, and validation
-  paypal-deposit.ts            v2 PayPal flow — paypal.me username + Peer extension fallback
+  paypal-deposit.ts            PayPal flow — paypal.me username + Peer extension fallback
   react-example.tsx            useOfframp hook usage in React (Revolut)
   paypal-react-example.tsx     useOfframp + usePeerExtensionRegistration handshake
   webhook-receiver.ts          HMAC-verified HTTPS receiver for deposit/otc events
@@ -68,7 +68,7 @@ templates/                   Scaffold-ready integrations (used by create-offramp
   next/                        Next.js 16 App Router + Privy
   vite/                        Vite + React 19 + viem
   telegram-bot/                Node 22 + grammy + viem (server-side maker bot)
-  README.md                    template selection + v1 → v2 upgrade notes
+  README.md                    template selection + v1/v2 upgrade notes
 
 skills/                      Claude Code skills for AI-assisted development
   claude/
@@ -126,12 +126,13 @@ const client = new Peerlytics({ apiKey: "pk_live_..." });
 const { orderbooks } = await client.getOrderbook({ currency: "USD", platform: "revolut" });
 ```
 
-Auth: [free API key](https://peerlytics.xyz/developers?tab=account) (1,000 requests/month) or x402 pay-per-request with USDC on Base.
+Auth: [free API key](https://peerlytics.xyz/developers?tab=account) (1,000 requests/month) or x402 pay-per-request with USDC on Base. SDK 1.2 can drive x402 directly with `auth: { mode: "x402", signer }`.
 
 **Gotchas worth knowing** (SDK ≥ 1.0, Stripe-style v2 wire format):
 
 - List methods (`getActivity`, `getDeposits`, `getIntents`, `getMarketSummary`) return paginated envelopes like `{ events, count, hasMore, ... }` — iterate over `.events` / `.deposits` / etc, not the top-level result.
 - `getDeposits()` requires at least one of `depositor`, `delegate`, `platform`, `currency`; `getIntents()` requires at least one of `owner`, `recipient`, `verifier`, `depositId`, `status`. Both throw `ValidationError` client-side if called empty.
+- `getOrderbook({ taker })` includes private deposits whitelisted for that buyer wallet alongside public liquidity.
 - `DepositMarket.currency` / `deposit.currencies[].currency` are resolved ISO codes (e.g. `"GBP"`). `currencyCode` is the raw bytes32 hash — use `currency` for display.
 - Key management uses the opaque `id` from `listKeys()` (not the raw key): `deleteKey(id)`, `rotateKey(idOrKey)`, `createKey(label?)`.
 - Webhook event vocabulary aligned with `LiveEvent.type`: `intent.signaled`, `intent.fulfilled`, `deposit.rate_updated`. Legacy names (`intent.created`, `intent.filled`, `rate.updated`) are accepted on register but normalized server-side.
@@ -158,7 +159,7 @@ await offramp(walletClient, {
 
 Pass `otcTaker` to restrict a deposit to one wallet, or use `enableOtc` / `disableOtc` / `getOtcLink` to retrofit a public deposit. Both paths are in `usdctofiat/otc-deposit.ts`.
 
-**PayPal and Wise** makers must register their handle in the Peer (PeerAuth) browser extension before the first deposit. v2 throws `EXTENSION_REGISTRATION_REQUIRED` and ships `usePeerExtensionRegistration(platform)` to drive the install / connect / verify flow. See `usdctofiat/paypal-react-example.tsx` and `usdctofiat/paypal-deposit.ts`. PayPal uses the `paypal.me` **username**, not the account email.
+**PayPal and Wise** makers must register their handle in the Peer (PeerAuth) browser extension before the first deposit. The SDK throws `EXTENSION_REGISTRATION_REQUIRED` and ships `usePeerExtensionRegistration(platform)` to drive the install / connect / verify flow. See `usdctofiat/paypal-react-example.tsx` and `usdctofiat/paypal-deposit.ts`. PayPal uses the `paypal.me` **username**, not the account email.
 
 Supported platforms: Revolut, Venmo, CashApp, Chime, Wise, Mercado Pago, Zelle, PayPal, Monzo, N26.
 

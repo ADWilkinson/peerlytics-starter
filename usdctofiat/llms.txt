@@ -1,4 +1,4 @@
-# @usdctofiat/offramp v2
+# @usdctofiat/offramp v3
 
 USDC-to-fiat offramp SDK for Base. Also ships outbound HMAC-signed webhooks for `deposit.*` and `otc.*` events (see Webhooks section below).
 
@@ -37,7 +37,7 @@ const otc = await offramp(walletClient, {
   identifier: "alice",
   otcTaker: "0xTakerAddress",
 });
-// { depositId, txHash, resumed, otcLink: "https://usdctofiat.xyz/deposit/<escrow>/<depositId>" }
+// { depositId, txHash, resumed, otcLink }
 
 // Retrofit OTC onto an existing deposit
 await enableOtc(walletClient, "362", "0xTakerAddress");
@@ -167,7 +167,7 @@ import { OfframpError, OFFRAMP_ERROR_CODES } from "@usdctofiat/offramp";
 //   VALIDATION
 //   APPROVAL_FAILED
 //   REGISTRATION_FAILED
-//   EXTENSION_REGISTRATION_REQUIRED   // NEW in v2 — PayPal / Wise Peer extension gate
+//   EXTENSION_REGISTRATION_REQUIRED   // PayPal / Wise Peer extension gate
 //   DEPOSIT_FAILED
 //   CONFIRMATION_FAILED
 //   DELEGATION_FAILED
@@ -223,6 +223,16 @@ the platform entry is `undefined` for every other platform.
 
 See `usdctofiat/paypal-react-example.tsx` and `usdctofiat/paypal-deposit.ts`.
 
+## Peer Extension v3 direct-driver changes
+
+If you use the re-exported `peerExtensionSdk` directly, v3 follows
+`@zkp2p/sdk@0.4.x`: `peerExtensionSdk.onramp(params, callback)` returns
+prepared calldata through the callback and the host app broadcasts that
+transaction with its wallet client. `intentHash` is required in onramp params,
+`onIntentFulfilled()` is removed, and
+`peerExtensionSdk.getOnrampTransaction(intentHash)` is the recovery path when a
+callback was missed.
+
 ## How It Works
 
 offramp() is resumable. Before creating a new deposit, it checks for an existing undelegated deposit. If found, skips to delegation.
@@ -263,6 +273,12 @@ v1.x is broken against the live curator — the old `POST /v1/makers/create` end
 1. Re-prompt PayPal users for their paypal.me USERNAME (not email).
 2. Handle `OFFRAMP_ERROR_CODES.EXTENSION_REGISTRATION_REQUIRED` on PayPal and Wise — walk the user through `usePeerExtensionRegistration(...)` and retry.
 3. If you hand-rolled `POST /v1/makers/create`, switch to `POST /v2/makers/create` with `{ processorName, offchainId, telegramUsername? }`.
+
+## v3 migration
+
+The core `offramp()` / `useOfframp()` flow remains stable. Only direct
+`peerExtensionSdk` drivers need to migrate to the prepared-calldata callback
+model described above.
 
 ## Links
 

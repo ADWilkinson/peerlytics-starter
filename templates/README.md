@@ -20,7 +20,7 @@ The CLI prompts for your `integratorId` and substitutes it into the template fil
 
 ## What ships in each template
 
-- `package.json` pinned to the latest `@usdctofiat/offramp` v2.x
+- `package.json` pinned to the latest `@usdctofiat/offramp` v3.x
 - A working `offramp()` call wired to `PLATFORMS.VENMO` / `CURRENCIES.USD` — edit to taste
 - Your `integratorId` baked in via the CLI prompt
 - A `TODO_SET_REFERRAL_ID` placeholder for partner attribution — replace before shipping
@@ -30,6 +30,12 @@ The CLI prompts for your `integratorId` and substitutes it into the template fil
 ## Upgrading from v1.x
 
 v2.0.0 was a breaking change: PayPal makers now use the `paypal.me` username (not email), maker registration moved to `POST /v2/makers/create`, and PayPal + Wise must drive the Peer browser-extension handshake before the first deposit. These templates already use the v2 surface (`useOfframp` + `usePeerExtensionRegistration`). For forks of older templates, see the [SDK v2 migration guide](https://github.com/ADWilkinson/galleonlabs-zkp2p/blob/main/packages/offramp-sdk/CHANGELOG.md#200---2026-04-24).
+
+## Upgrading from v2.x
+
+The template-level `offramp()` and `useOfframp()` flow stays the same on v3.
+Only direct `peerExtensionSdk` integrations need to migrate to the
+`@zkp2p/sdk@0.4.x` prepared-calldata callback model.
 
 ## Manual install (no CLI)
 

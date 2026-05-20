@@ -4,7 +4,7 @@
  * PayPal and Wise makers must register their handle inside the Peer
  * (PeerAuth) browser extension before curator's /v2/makers/create will
  * accept the deposit. This example demonstrates how to catch the
- * EXTENSION_REGISTRATION_REQUIRED error from @usdctofiat/offramp v2 and
+ * EXTENSION_REGISTRATION_REQUIRED error from @usdctofiat/offramp and
  * walk the user through the install → connect → verify handshake via
  * the usePeerExtensionRegistration hook.
  *

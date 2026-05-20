@@ -50,7 +50,7 @@ Analytics:
 
 Market:
 - client.getMarketSummary({ currency?, platform?, includeRates?, limit?, offset? }) - rate stats per pair
-- client.getOrderbook({ currency?, platform?, minSize? }) - live orderbook by rate level
+- client.getOrderbook({ currency?, platform?, minSize?, taker? }) - live orderbook by rate level; `taker` includes private deposits whitelisted for that wallet
 
 Explorer:
 - client.getDeposit(id, { limit?, offset? }) - deposit detail with intents
@@ -113,7 +113,7 @@ Legacy aliases (`intent.created`, `intent.filled`, `rate.updated`) are still acc
 ## Auth
 
 1. API key: set PEERLYTICS_API_KEY env var or pass { apiKey: "pk_live_..." }. Each key includes 1000 free requests/month. Generate via peerlytics.xyz/developers or programmatically with client.createKey().
-2. x402: pay per request with USDC on Base, no key needed
+2. x402: pay per request with USDC on Base, no key needed. Pass `auth: { mode: "x402", signer }` to the SDK, or provide `paymentHandler` in custom agent runtimes that build the `PAYMENT-SIGNATURE` header themselves.
 
 ## Errors
 

@@ -1,7 +1,7 @@
 /**
  * react-example.tsx
  *
- * Reference React component for @usdctofiat/offramp v2.
+ * Reference React component for @usdctofiat/offramp v3.
  * Copy-paste template — not runnable standalone.
  */
 

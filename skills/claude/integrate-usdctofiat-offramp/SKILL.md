@@ -1,13 +1,13 @@
 ---
 name: integrate-usdctofiat-offramp
-description: Integrate the @usdctofiat/offramp SDK (v2.x) into a dApp to add USDC-to-fiat offramp functionality on Base. Use when asked to add an offramp, sell USDC for fiat, integrate USDCtoFiat, build a deposit flow, ship OTC private orders, or wire HMAC-signed deposit/otc lifecycle webhooks.
+description: Integrate the @usdctofiat/offramp SDK (v3.x) into a dApp to add USDC-to-fiat offramp functionality on Base. Use when asked to add an offramp, sell USDC for fiat, integrate USDCtoFiat, build a deposit flow, ship OTC private orders, or wire HMAC-signed deposit/otc lifecycle webhooks.
 ---
 
-# Integrate USDCtoFiat Offramp (v2.x)
+# Integrate USDCtoFiat Offramp (v3.x)
 
 ## Overview
 
-Guide the user to integrate `@usdctofiat/offramp` v2.x. Surface area: 1 primary function (`offramp()`), 5 helpers (`deposits`, `close`, `enableOtc`, `disableOtc`, `getOtcLink`), 2 const objects (`PLATFORMS`, `CURRENCIES`), 2 React hooks (`useOfframp`, `usePeerExtensionRegistration`).
+Guide the user to integrate `@usdctofiat/offramp` v3.x. Surface area: 1 primary function (`offramp()`), 5 helpers (`deposits`, `close`, `enableOtc`, `disableOtc`, `getOtcLink`), 2 const objects (`PLATFORMS`, `CURRENCIES`), 2 React hooks (`useOfframp`, `usePeerExtensionRegistration`).
 
 Companion docs:
 
@@ -87,7 +87,7 @@ const { depositId, otcLink } = await offramp(walletClient, {
   identifier: "alice",
   otcTaker: "0xBuyerWallet",
 });
-// otcLink: https://usdctofiat.xyz/deposit/<escrow>/<depositId> -- share with the approved buyer
+// otcLink: share with the approved buyer
 ```
 
 Retrofit OTC onto an existing public deposit:
@@ -105,7 +105,7 @@ Buyer rejection happens at the `WhitelistPreIntentHook` contract before payment 
 ## PayPal + Wise (Peer extension handshake)
 
 PayPal and Wise makers must register their handle inside the Peer (PeerAuth)
-browser extension before the first deposit. v2 throws
+browser extension before the first deposit. The SDK throws
 `OfframpError` with code `EXTENSION_REGISTRATION_REQUIRED` when curator rejects
 a maker for this reason. Drive recovery with the React hook:
 
@@ -175,6 +175,16 @@ existing undelegated deposit on the wallet and resumes from delegation if
 found. Handles browser crashes, failed delegation, and retries automatically —
 just call `offramp()` again.
 
+## Peer extension fulfill changes in v3
+
+If you drive the re-exported `peerExtensionSdk` directly, v3 follows
+`@zkp2p/sdk@0.4.x`: `peerExtensionSdk.onramp(params, callback)` now returns
+prepared calldata through the callback and the host app broadcasts it with its
+wallet client. `intentHash` is required in the onramp params. The removed
+`onIntentFulfilled()` subscription is replaced by the prepared-calldata callback
+and the optional `peerExtensionSdk.getOnrampTransaction(intentHash)` recovery
+path.
+
 ## Error handling
 
 ```typescript
@@ -236,6 +246,12 @@ Reference verifier (Node, ~150 LOC, `node:crypto` only):
 - All deposits delegate to the Delegate vault (mandatory — pricing is managed)
 - Rate mode is `track_market` (vault oracle handles quoting)
 - Attribution: ERC-8021, builder code `usdctofiat` baked in via `replaceAttribution`
+
+## v2 → v3 migration
+
+If you drive `peerExtensionSdk` directly, migrate to the prepared-calldata
+callback shape from `@zkp2p/sdk@0.4.x`. If you only use `offramp()` and the
+React hooks, the deposit flow keeps the same high-level integration surface.
 
 ## v1 → v2 migration
 
